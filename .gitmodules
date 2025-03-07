@@ -1,0 +1,13 @@
+[submodule "vendor/raylib-cpp"]
+	path = vendor/raylib-cpp
+	url = https://github.com/robloach/raylib-cpp
+	branch = next
+[submodule "vendor/raylib"]
+	path = vendor/raylib
+	url = https://github.com/raysan5/raylib
+[submodule "vendor/json"]
+	path = vendor/json
+	url = https://github.com/nlohmann/json
+[submodule "vendor/raygui"]
+	path = vendor/raygui
+	url = https://github.com/raysan5/raygui

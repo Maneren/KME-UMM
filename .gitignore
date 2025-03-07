@@ -1,0 +1,7 @@
+include
+build
+dist
+.idea
+.cache
+compile_commands.json
+vgcore.*
