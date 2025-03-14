@@ -43,15 +43,16 @@ else
 	COPY = cp -r $1$(PATHSEP)$3 $2
 endif
 
-buildName := release
-CXXFLAGS := -g3 -Ofast
-RAYLIB_BUILD_MODE := RELEASE
-
 DEBUG ?= 0
 ifeq ($(DEBUG), 1)
 	buildName := debug
-	CXXFLAGS := -g3 -gdwarf-5 -Og -fno-omit-frame-pointer -Wall -Wextra
+	CXXFLAGS := -g3 -gdwarf-5 -Og -fno-omit-frame-pointer -Wall -Wextra -fsanitize=address
+	linkFlags += -fsanitize=address
 	RAYLIB_BUILD_MODE := DEBUG
+else
+	buildName := release
+	RAYLIB_BUILD_MODE := RELEASE
+	CXXFLAGS := -g3 -O2
 endif
 
 # Set global macros
@@ -97,7 +98,7 @@ $(libraylib):
 		PLATFORM=PLATFORM_DESKTOP \
 		RAYLIB_BUILD_MODE=$(RAYLIB_BUILD_MODE) \
 		RAYLIB_MODULE_AUDIO=FALSE \
-		RAYLIB_MODULE_MODELS=FALSE \
+		RAYLIB_MODULE_MODELS=TRUE \
 		GRAPHICS=GRAPHICS_API_OPENGL_43
 	$(MKDIR) $(call platformpth, $(buildLibDir))
 	$(call COPY,vendor/raylib/src,$(buildLibDir),libraylib.a)
