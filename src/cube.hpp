@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Mesh.hpp"
 #include "body.hpp"
 #include "material.hpp"
 #include <Color.hpp>
+#include <Mesh.hpp>
 #include <Vector3.hpp>
 
 class Cube final : public Body {

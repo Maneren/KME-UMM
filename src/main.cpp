@@ -5,12 +5,12 @@
 #include "joints/spring.hpp"
 #include "material.hpp"
 #include "object.hpp"
-#include "raylib.h"
 #include <Camera3D.hpp>
 #include <Color.hpp>
 #include <Vector3.hpp>
 #include <Window.hpp>
 #include <memory>
+#include <raylib.h>
 #include <vector>
 
 int main() {

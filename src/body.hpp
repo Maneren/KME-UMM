@@ -1,13 +1,13 @@
 #pragma once
 
-#include "Image.hpp"
-#include "Material.hpp"
-#include "Mesh.hpp"
-#include "Model.hpp"
-#include "Texture.hpp"
 #include "consts.hpp"
 #include "defs.hpp"
 #include "object.hpp"
+#include <Image.hpp>
+#include <Material.hpp>
+#include <Mesh.hpp>
+#include <Model.hpp>
+#include <Texture.hpp>
 #include <Vector3.hpp>
 #include <Vector4.hpp>
 #include <cmath>

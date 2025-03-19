@@ -1,11 +1,9 @@
 #include "cube.hpp"
-#include "Model.hpp"
 #include "consts.hpp"
-#include "defs.hpp"
-#include "raylib.h"
-#include "rlgl.h"
+#include <Model.hpp>
 #include <print>
 #include <raymath.h>
+#include <rlgl.h>
 
 constexpr raylib::Vector3
 aerodynamic_drag(const raylib::Vector3 &velocity, const float area) {
@@ -22,9 +20,11 @@ constexpr raylib::Vector3 friction(
   const auto direction = velocity.Normalize();
   const auto is_dynamic = velocity.LengthSqr() >= 0.1f;
 
+  const auto dynamic_friction = material.dynamic_friction();
+  const auto static_friction = material.static_friction();
+
   return direction * normal.y *
-         (is_dynamic ? material.dynamic_friction() : material.static_friction()
-         );
+         (is_dynamic ? dynamic_friction : static_friction);
 }
 
 void Cube::update(float delta) {
@@ -40,12 +40,3 @@ void Cube::update(float delta) {
 
   body_update(delta);
 }
-
-// void Cube::draw() {
-//   const auto mesh = GenMeshCube(_size.x, _size.y, _size.z);
-//   auto model = raylib::Model(mesh);
-//   model.transform = _orientation.ToMatrix();
-//   DrawModel(model, _position, 1.0f, _color);
-//   // _position.DrawCube(_size, _color);
-//   // _position.DrawCubeWires(_size, raylib::Color::Black());
-// }
