@@ -125,7 +125,7 @@ protected:
 
     const auto torque =
         transform_offset(offset).CrossProduct(transform_offset(force));
-    const float moment = moment_of_inertia(torque);
+    const float moment = moment_of_inertia(torque.Normalize());
     _angular_acceleration += torque / moment;
   };
 

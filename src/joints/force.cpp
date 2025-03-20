@@ -12,6 +12,7 @@ void ForceJoint::update(const float) {
     return;
   }
 
+  std::println("position_a: {}, position_b: {}", position_a, position_b);
   const auto direction_a = position_b - position_a;
   const auto direction_b = position_a - position_b;
 
@@ -20,6 +21,7 @@ void ForceJoint::update(const float) {
 
   const auto force_a = direction_a.Scale(strength / direction_a_length);
   const auto force_b = direction_b.Scale(strength / direction_b_length);
+  std::println("force_a: {}, force_b: {}", force_a, force_b);
 
   _body_a->apply_force(force_a, offset_a);
   _body_b->apply_force(force_b, offset_b);

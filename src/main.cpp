@@ -1,5 +1,4 @@
 #include "consts.hpp"
-// #include "joints/force.hpp"
 #include "cuboid.hpp"
 #include "joints/force.hpp"
 #include "joints/spring.hpp"
@@ -9,8 +8,10 @@
 #include <Color.hpp>
 #include <Vector3.hpp>
 #include <Window.hpp>
+#include <format>
 #include <memory>
 #include <raylib.h>
+#include <rlgl.h>
 #include <vector>
 
 int main() {
@@ -23,6 +24,10 @@ int main() {
       "UMM Car simulator",
       FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT
   );
+
+  rlEnableBackfaceCulling();
+
+  window.SetTargetFPS(60);
 
   // Initialize the camera
   raylib::Camera3D camera{
@@ -88,39 +93,42 @@ int main() {
   {
     // Update
     //----------------------------------------------------------------------------------
-    const float delta = window.GetFrameTime();
+    float delta = window.GetFrameTime();
 
-    // Apply gravity
-    cube1->apply_force(GRAVITY);
-    cube2->apply_force(GRAVITY);
+    if (delta >= EPSILON) {
 
-    camera.Update(CAMERA_THIRD_PERSON);
+      // Apply gravity
+      cube1->apply_force(GRAVITY);
+      cube2->apply_force(GRAVITY);
 
-    for (const auto &object : game_objects) {
-      object->update(delta);
+      camera.Update(CAMERA_THIRD_PERSON);
+
+      for (const auto &object : game_objects) {
+        object->update(delta);
+      }
+
+      if (IsKeyDown(KEY_SPACE)) {
+        cube1->apply_force(-GRAVITY * 1.5f);
+      }
+
+      if (IsKeyDown(KEY_W)) {
+        cube1->apply_force(raylib::Vector3{0.0f, 0.0f, -10.0f});
+      }
+
+      if (IsKeyDown(KEY_S)) {
+        cube1->apply_force(raylib::Vector3{0.0f, 0.0f, 10.0f});
+      }
+
+      if (IsKeyDown(KEY_A)) {
+        cube1->apply_force(raylib::Vector3{-10.0f, 0.0f, 0.0f});
+      }
+
+      if (IsKeyDown(KEY_D)) {
+        cube1->apply_force(raylib::Vector3{10.0f, 0.0f, 0.0f});
+      }
+
+      camera.target = (cube1->position() + cube2->position()) / 2.f;
     }
-
-    if (IsKeyDown(KEY_SPACE)) {
-      cube1->apply_force(-GRAVITY * 1.5f);
-    }
-
-    if (IsKeyDown(KEY_W)) {
-      cube1->apply_force(raylib::Vector3{0.0f, 0.0f, -10.0f});
-    }
-
-    if (IsKeyDown(KEY_S)) {
-      cube1->apply_force(raylib::Vector3{0.0f, 0.0f, 10.0f});
-    }
-
-    if (IsKeyDown(KEY_A)) {
-      cube1->apply_force(raylib::Vector3{-10.0f, 0.0f, 0.0f});
-    }
-
-    if (IsKeyDown(KEY_D)) {
-      cube1->apply_force(raylib::Vector3{10.0f, 0.0f, 0.0f});
-    }
-
-    camera.target = (cube1->position() + cube2->position()) / 2.f;
     //----------------------------------------------------------------------------------
 
     // Draw
@@ -140,6 +148,12 @@ int main() {
     camera.EndMode();
 
     window.DrawFPS();
+
+    const auto text = std::format("Velocity: ({})", cube1->angular_velocity());
+    DrawText(&text.front(), 10, 30, 20, raylib::Color::Black());
+    const auto text2 =
+        std::format("Acceleration: ({})", cube1->angular_acceleration());
+    DrawText(&text2.front(), 10, 50, 20, raylib::Color::Black());
 
     window.EndDrawing();
     //----------------------------------------------------------------------------------
