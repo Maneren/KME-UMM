@@ -1,6 +1,5 @@
-#include "cube.hpp"
+#include "cuboid.hpp"
 #include "consts.hpp"
-#include <Model.hpp>
 #include <print>
 #include <raymath.h>
 #include <rlgl.h>
@@ -27,16 +26,48 @@ constexpr raylib::Vector3 friction(
          (is_dynamic ? dynamic_friction : static_friction);
 }
 
-void Cube::update(float delta) {
+void Cuboid::update(float delta) {
   if (_position.y <= _size.y / 2) {
     _position.y = _size.y / 2;
-    _velocity.y *= -BOUNCE_COEFFICIENT;
 
     if (_velocity.y < 0.1f) {
       _velocity.y = 0.0f;
       _acceleration += friction(_velocity, GRAVITY * _mass, _material);
+    } else {
+      _velocity.y *= -BOUNCE_COEFFICIENT;
     }
   }
 
   body_update(delta);
+}
+
+float Cuboid::moment_of_inertia(const raylib::Vector3 &axis) {
+  const auto x = _size.x;
+  const auto y = _size.y;
+  const auto z = _size.z;
+
+  const float I_xx = 1.f / 12.f * _mass * (y * y + z * z);
+  const float I_yy = 1.f / 12.f * _mass * (x * x + z * z);
+  const float I_zz = 1.f / 12.f * _mass * (x * x + y * y);
+
+  const raylib::Matrix inertia_tensor{
+      I_xx,
+      0.f,
+      0.f,
+      0.f,
+      0.f,
+      I_yy,
+      0.f,
+      0.f,
+      0.f,
+      0.f,
+      I_zz,
+      0.f,
+      0.f,
+      0.f,
+      0.f,
+      0.f
+  };
+
+  return axis.Transform(inertia_tensor).DotProduct(axis);
 }

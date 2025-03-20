@@ -1,14 +1,14 @@
 #pragma once
 
+#include <Mesh.hpp>
 #include "body.hpp"
 #include "material.hpp"
 #include <Color.hpp>
-#include <Mesh.hpp>
 #include <Vector3.hpp>
 
-class Cube final : public Body {
+class Cuboid final : public Body {
 public:
-  Cube(
+  Cuboid(
       raylib::Vector3 size,
       raylib::Color color,
       BodyMaterial material,
@@ -19,13 +19,11 @@ public:
     _color = color;
   };
 
-  ~Cube() = default;
+  ~Cuboid() = default;
 
   void update(const float delta) override;
 
-  float moment_of_inertia(const raylib::Vector3 &) override {
-    return 1.f / 6.f * _mass * (_size.x * _size.x);
-  }
+  float moment_of_inertia(const raylib::Vector3 &axis) override;
 
 protected:
   raylib::MeshUnmanaged create_mesh() override {

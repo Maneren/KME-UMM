@@ -1,6 +1,6 @@
 #include "consts.hpp"
-#include "cube.hpp"
 // #include "joints/force.hpp"
+#include "cuboid.hpp"
 #include "joints/force.hpp"
 #include "joints/spring.hpp"
 #include "material.hpp"
@@ -39,25 +39,25 @@ int main() {
 
   std::vector<std::shared_ptr<Object>> game_objects;
 
-  std::shared_ptr<Body> cube1 = std::make_shared<Cube>(
+  std::shared_ptr<Body> cube1 = std::make_shared<Cuboid>(
       raylib::Vector3{2.0f, 2.0f, 2.0f},
       raylib::Color::Red(),
-      lubricated,
+      rubber,
       raylib::Vector3{5.0f, 0.0f, 0.0f}
   );
 
-  cube1->mass(10.f);
+  cube1->mass(1.f);
 
   game_objects.push_back(cube1);
 
-  std::shared_ptr<Body> cube2 = std::make_shared<Cube>(
-      raylib::Vector3{2.0f, 2.0f, 2.0f},
+  std::shared_ptr<Body> cube2 = std::make_shared<Cuboid>(
+      raylib::Vector3{2.0f, 2.f, 6.0f},
       raylib::Color::Blue(),
-      rubber,
+      lubricated,
       raylib::Vector3{-5.0f, 0.0f, 0.0f}
   );
 
-  cube2->mass(10.f);
+  cube2->mass(1.f);
 
   game_objects.push_back(cube2);
 
@@ -66,7 +66,8 @@ int main() {
       std::static_pointer_cast<Body>(cube2),
       raylib::Color::Green(),
       1.f,
-      2.f
+      2.f,
+      0.9f
   );
 
   joint->anchor_a(raylib::Vector3{-1.0f, .0f, 1.0f})
