@@ -10,6 +10,7 @@
 #include <Window.hpp>
 #include <format>
 #include <memory>
+#include <print>
 #include <raylib.h>
 #include <rlgl.h>
 #include <vector>
@@ -22,12 +23,12 @@ int main() {
       screenWidth,
       screenHeight,
       "UMM Car simulator",
-      FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT
+      FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT //| FLAG_VSYNC_HINT
   );
 
   rlEnableBackfaceCulling();
 
-  window.SetTargetFPS(60);
+  window.SetTargetFPS(100);
 
   // Initialize the camera
   raylib::Camera3D camera{
@@ -66,19 +67,41 @@ int main() {
 
   game_objects.push_back(cube2);
 
+  std::shared_ptr<Body> cube3 = std::make_shared<Cuboid>(
+      raylib::Vector3{2.0f, 2.f, 2.0f},
+      raylib::Color::Yellow(),
+      steel,
+      raylib::Vector3{0.0f, 0.0f, 6.0f}
+  );
+
+  game_objects.push_back(cube3);
+
   std::shared_ptr<Joint> joint = std::make_shared<SpringJoint>(
       std::static_pointer_cast<Body>(cube1),
       std::static_pointer_cast<Body>(cube2),
       raylib::Color::Green(),
       1.f,
-      2.f,
-      0.9f
+      8.f,
+      0.7f
   );
 
   joint->anchor_a(raylib::Vector3{-1.0f, .0f, 1.0f})
       .anchor_b(raylib::Vector3{1.0f, .0f, 1.0f});
 
+  std::shared_ptr<Joint> joint2 = std::make_shared<SpringJoint>(
+      std::static_pointer_cast<Body>(cube1),
+      std::static_pointer_cast<Body>(cube3),
+      raylib::Color::Green(),
+      1.f,
+      8.f,
+      0.7f
+  );
+
+  joint2->anchor_a(raylib::Vector3{1.0f, .0f, -1.0f})
+      .anchor_b(raylib::Vector3{1.0f, .0f, 1.0f});
+
   game_objects.push_back(joint);
+  game_objects.push_back(joint2);
 
   for (auto &object : game_objects) {
     object->initialize();
@@ -93,7 +116,8 @@ int main() {
   {
     // Update
     //----------------------------------------------------------------------------------
-    float delta = window.GetFrameTime();
+    float delta = window.GetFrameTime() / 1000.f;
+    std::println("\n\ndelta: {}", delta);
 
     if (delta >= EPSILON) {
 

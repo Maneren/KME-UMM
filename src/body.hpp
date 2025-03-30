@@ -117,15 +117,22 @@ protected:
   void body_apply_force(
       const raylib::Vector3 &force, const raylib::Vector3 &offset
   ) {
+    std::println("force: {}, offset: {}", force, offset);
+
+    const auto magnitude = force.Length();
+    if (magnitude <= EPSILON)
+      return;
+
     _acceleration += force / _mass;
 
-    const auto length = offset.Length();
-    if (length <= EPSILON)
+    const auto arm_length = offset.Length();
+    if (arm_length <= EPSILON)
       return;
 
     const auto torque =
         transform_offset(offset).CrossProduct(transform_offset(force));
     const float moment = moment_of_inertia(torque.Normalize());
+    std::println("moment: {}, torque: {}", moment, torque);
     _angular_acceleration += torque / moment;
   };
 
@@ -138,11 +145,24 @@ private:
   void update_position(const float delta) {
     _velocity += _acceleration * delta;
     _position += _velocity * delta;
+    std::println(
+        "position: {}, velocity: {}, acceleration: {}",
+        _position,
+        _velocity,
+        _acceleration
+    );
     _acceleration = raylib::Vector3::Zero();
   }
 
   void update_orientation(const float delta) {
     _angular_velocity += _angular_acceleration * delta;
+
+    std::println(
+        "angular_acceleration: {}, angular_velocity: {}",
+        _angular_acceleration,
+        _angular_velocity
+    );
+
     _angular_acceleration = raylib::Vector3::Zero();
 
     const auto angle = _angular_velocity.Length();
@@ -155,7 +175,9 @@ private:
     const auto axis = _angular_velocity.Normalize();
     const auto rotation = raylib::Quaternion::FromAxisAngle(axis, angle);
 
-    std::println("orientation: {}, rotation: {}", _orientation, rotation);
+    std::println(
+        "orientation: {}, rotation: {} ({})", _orientation, rotation, angle
+    );
     _orientation = (_orientation * rotation).Normalize();
     _model.transform = _orientation.ToMatrix();
   }
