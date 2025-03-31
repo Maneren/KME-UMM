@@ -13,13 +13,13 @@ public:
       const float relaxed_length,
       const float damping = 1.0f
   )
-      : Joint(body_a, body_b, color), strength(strength),
+      : Joint(body_a, body_b, color), stiffness(strength),
         relaxed_length(relaxed_length), damping(damping) {}
 
   void update(const float dt) override;
 
 protected:
-  float strength;
+  float stiffness;
   float relaxed_length;
   float last_length = -1.f;
   float damping = 0.0f;

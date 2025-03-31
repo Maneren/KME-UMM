@@ -16,7 +16,7 @@ void SpringJoint::update(const float delta) {
   const auto extra_length = length - relaxed_length;
 
   std::println("relaxed_length: {}, distance: {}", relaxed_length, length);
-  auto force = extra_length / relaxed_length * strength;
+  auto force = extra_length / relaxed_length * stiffness;
 
   if (damping > 0.f && last_length >= 0.f) {
     const auto length_delta = last_length - length;
