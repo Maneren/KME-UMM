@@ -16,27 +16,30 @@ void SpringJoint::update(const float delta) {
   const auto extra_length = length - relaxed_length;
 
   std::println("relaxed_length: {}, distance: {}", relaxed_length, length);
-  auto force_magnitude = extra_length / relaxed_length * strength;
+  auto force = extra_length / relaxed_length * strength;
 
   if (damping > 0.f && last_length >= 0.f) {
     const auto length_delta = last_length - length;
-    const auto velocity_magnitude = length_delta / delta;
+    const auto velocity = length_delta / delta;
+
+    const auto damped = force - damping * velocity;
 
     std::println(
-        "delta: {}, length_delta: {}, magnitude: {}, force: {}, "
-        "damping: {}",
+        "delta: {}, length_delta: {}, velocity: {}, force: {}, "
+        "damping: {} -> {}",
         delta,
         length_delta,
-        velocity_magnitude,
-        force_magnitude,
-        damping * velocity_magnitude
+        velocity,
+        force,
+        damping * velocity,
+        damped
     );
-    force_magnitude -= damping * velocity_magnitude;
+    force = damped;
   }
 
   last_length = length;
 
-  const auto force_a = connection.Scale(force_magnitude / length);
+  const auto force_a = connection.Scale(force / length);
   const auto force_b = -force_a;
   std::println("force_a: {}, force_b: {}", force_a, force_b);
 

@@ -22,5 +22,5 @@ protected:
   float strength;
   float relaxed_length;
   float last_length = -1.f;
-  float damping = 1.0f;
+  float damping = 0.0f;
 };
