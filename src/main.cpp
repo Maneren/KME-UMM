@@ -52,7 +52,7 @@ int main() {
       raylib::Vector3{5.0f, 0.0f, 0.0f}
   );
 
-  cube1->mass(1.f);
+  cube1->mass(1000.f);
 
   game_objects.push_back(cube1);
 
@@ -63,7 +63,7 @@ int main() {
       raylib::Vector3{-5.0f, 0.0f, 0.0f}
   );
 
-  cube2->mass(1.f);
+  cube2->mass(1000.f);
 
   game_objects.push_back(cube2);
 
@@ -71,18 +71,20 @@ int main() {
       raylib::Vector3{2.0f, 2.f, 2.0f},
       raylib::Color::Yellow(),
       steel,
-      raylib::Vector3{0.0f, 0.0f, 6.0f}
+      raylib::Vector3{5.0f, 0.0f, -9.0f}
   );
 
   game_objects.push_back(cube3);
+
+  cube3->mass(1000.f);
 
   std::shared_ptr<Joint> joint = std::make_shared<SpringJoint>(
       std::static_pointer_cast<Body>(cube1),
       std::static_pointer_cast<Body>(cube2),
       raylib::Color::Green(),
-      1.f,
+      10.f,
       8.f,
-      0.7f
+      0.2f
   );
 
   joint->anchor_a(raylib::Vector3{-1.0f, .0f, 1.0f})
@@ -92,9 +94,9 @@ int main() {
       std::static_pointer_cast<Body>(cube1),
       std::static_pointer_cast<Body>(cube3),
       raylib::Color::Green(),
-      1.f,
+      10.f,
       8.f,
-      0.7f
+      0.2f
   );
 
   joint2->anchor_a(raylib::Vector3{1.0f, .0f, -1.0f})
@@ -116,14 +118,15 @@ int main() {
   {
     // Update
     //----------------------------------------------------------------------------------
-    float delta = window.GetFrameTime() / 1000.f;
+    float delta = window.GetFrameTime();
     std::println("\n\ndelta: {}", delta);
 
     if (delta >= EPSILON) {
 
       // Apply gravity
-      cube1->apply_force(GRAVITY);
-      cube2->apply_force(GRAVITY);
+      cube1->apply_force(GRAVITY * cube1->mass());
+      cube2->apply_force(GRAVITY * cube2->mass());
+      cube3->apply_force(GRAVITY * cube3->mass());
 
       camera.Update(CAMERA_THIRD_PERSON);
 
@@ -131,24 +134,26 @@ int main() {
         object->update(delta);
       }
 
+      const auto move_force = 10000.f;
+
       if (IsKeyDown(KEY_SPACE)) {
-        cube1->apply_force(-GRAVITY * 1.5f);
+        cube1->apply_force(-GRAVITY * 1500.f);
       }
 
       if (IsKeyDown(KEY_W)) {
-        cube1->apply_force(raylib::Vector3{0.0f, 0.0f, -10.0f});
+        cube1->apply_force(raylib::Vector3{0.0f, 0.0f, -move_force});
       }
 
       if (IsKeyDown(KEY_S)) {
-        cube1->apply_force(raylib::Vector3{0.0f, 0.0f, 10.0f});
+        cube1->apply_force(raylib::Vector3{0.0f, 0.0f, move_force});
       }
 
       if (IsKeyDown(KEY_A)) {
-        cube1->apply_force(raylib::Vector3{-10.0f, 0.0f, 0.0f});
+        cube1->apply_force(raylib::Vector3{-move_force, 0.0f, 0.0f});
       }
 
       if (IsKeyDown(KEY_D)) {
-        cube1->apply_force(raylib::Vector3{10.0f, 0.0f, 0.0f});
+        cube1->apply_force(raylib::Vector3{move_force, 0.0f, 0.0f});
       }
 
       camera.target = (cube1->position() + cube2->position()) / 2.f;
@@ -163,7 +168,7 @@ int main() {
 
     camera.BeginMode();
 
-    DrawGrid(50, 1.0f);
+    DrawGrid(500, 1.0f);
 
     for (const auto &object : game_objects) {
       object->draw();

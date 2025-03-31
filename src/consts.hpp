@@ -15,6 +15,4 @@ constexpr float AIR_DENSITY = 1.293e-3;
 constexpr float BOUNCE_COEFFICIENT = 0.4f;
 constexpr float DRAG_COEFFICIENT_CUBE = 2.1f;
 
-constexpr float FRICTION_COEFFICIENT_CUBE = 0.3f;
-
-constexpr float ENVIRONMENT_FRICTION_COEFFICIENT = 0.9f;
+constexpr float ENVIRONMENT_FRICTION_COEFFICIENT = 0.5f;
