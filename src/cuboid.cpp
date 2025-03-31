@@ -16,14 +16,26 @@ constexpr raylib::Vector3 friction(
     const BodyMaterial &material
 ) {
   return raylib::Vector3::Zero();
-  const auto direction = velocity.Normalize();
-  const auto is_dynamic = velocity.LengthSqr() >= 0.1f;
+  const auto velocity_magnitude = velocity.Length();
+
+  const auto is_dynamic = velocity_magnitude >= 0.1f;
 
   const auto dynamic_friction = material.dynamic_friction();
   const auto static_friction = material.static_friction();
 
-  return direction * normal.y *
-         (is_dynamic ? dynamic_friction : static_friction);
+  const auto friction =
+      normal.Length() * (is_dynamic ? dynamic_friction : static_friction);
+
+  const auto friction_force = velocity.Scale(-friction / velocity_magnitude);
+
+  std::println(
+      "velocity: {}, normal: {}, friction: {}, friction_force: {}",
+      velocity,
+      normal,
+      friction,
+      friction_force
+  );
+  return friction_force;
 }
 
 void Cuboid::update(float delta) {
