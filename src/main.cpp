@@ -9,7 +9,6 @@
 #include <Color.hpp>
 #include <Vector3.hpp>
 #include <Window.hpp>
-#include <algorithm>
 #include <format>
 #include <memory>
 #include <print>
@@ -45,17 +44,18 @@ int main() {
   const BodyMaterial steel{0.8f, 0.6f};
   const BodyMaterial rubber{1.0f, 0.85f};
 
-  const auto cube_mesh = raylib::MeshUnmanaged::Cube(2.0f, 2.0f, 2.0f);
+  const auto cube_mesh = raylib::MeshUnmanaged::Cube(4.0f, 2.0f, 2.0f);
 
-  Polyhedron cube{
+  std::shared_ptr<Body> cube = std::make_shared<Polyhedron>(
       cube_mesh,
-      raylib::Color::White(),
+      raylib::Color::Black(),
       steel,
-      {0.0f, 0.0f, 0.0f},
-      {0.0f, 0.0f, 0.0f, 1.0f}
-  };
+      raylib::Vector3{0.0f, 2.0f, 0.0f}
+  );
 
   std::vector<std::shared_ptr<Object>> game_objects;
+
+  game_objects.push_back(cube);
 
   std::shared_ptr<Body> cube1 = std::make_shared<Cuboid>(
       raylib::Vector3{2.0f, 2.0f, 2.0f},
@@ -120,9 +120,6 @@ int main() {
   for (auto &object : game_objects) {
     object->initialize();
   }
-
-  return 0;
-
   //--------------------------------------------------------------------------------------
 
   // Main game loop

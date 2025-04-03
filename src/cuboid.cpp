@@ -3,7 +3,6 @@
 #include <print>
 #include <raymath.h>
 #include <rlgl.h>
-#include <vector>
 
 constexpr raylib::Vector3
 aerodynamic_drag(const raylib::Vector3 &velocity, const float area) {
