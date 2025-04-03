@@ -6,4 +6,6 @@ class Object : public Drawable {
 public:
   virtual void initialize() {};
   virtual void update(const float dt) = 0;
+
+  bool alive;
 };

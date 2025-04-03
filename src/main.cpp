@@ -8,6 +8,7 @@
 #include <Color.hpp>
 #include <Vector3.hpp>
 #include <Window.hpp>
+#include <algorithm>
 #include <format>
 #include <memory>
 #include <print>
@@ -130,10 +131,17 @@ int main() {
 
       camera.Update(CAMERA_THIRD_PERSON);
 
+      // Update all alive objects
       for (const auto &object : game_objects) {
-        object->update(delta);
+        if (object->alive) {
+          object->update(delta);
+        }
       }
 
+      // Remove dead objects
+      std::erase_if(game_objects, [](const auto &object) {
+        return !object->alive;
+      });
       const auto move_force = 10000.f;
 
       if (IsKeyDown(KEY_SPACE)) {
