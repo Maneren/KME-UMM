@@ -4,6 +4,7 @@
 #include "joints/spring.hpp"
 #include "material.hpp"
 #include "object.hpp"
+#include "polyhedron.hpp"
 #include <Camera3D.hpp>
 #include <Color.hpp>
 #include <Vector3.hpp>
@@ -43,6 +44,16 @@ int main() {
   const BodyMaterial lubricated{0.05f, 0.005f};
   const BodyMaterial steel{0.8f, 0.6f};
   const BodyMaterial rubber{1.0f, 0.85f};
+
+  const auto cube_mesh = raylib::MeshUnmanaged::Cube(2.0f, 2.0f, 2.0f);
+
+  Polyhedron cube{
+      cube_mesh,
+      raylib::Color::White(),
+      steel,
+      {0.0f, 0.0f, 0.0f},
+      {0.0f, 0.0f, 0.0f, 1.0f}
+  };
 
   std::vector<std::shared_ptr<Object>> game_objects;
 
@@ -110,6 +121,7 @@ int main() {
     object->initialize();
   }
 
+  return 0;
 
   //--------------------------------------------------------------------------------------
 
