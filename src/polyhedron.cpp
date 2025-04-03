@@ -44,7 +44,7 @@ Polyhedron::Polyhedron(
   // Compute inertia tensor
 
   _mass = 0.f;
-  _center_of_mass = raylib::Vector3::Zero();
+  auto center_of_mass = raylib::Vector3::Zero();
 
   // Note that thorought the computations, it is assumed that the last
   // (not on the triangle face) vertex of the tetrahedron lies at the origin.
@@ -61,7 +61,7 @@ Polyhedron::Polyhedron(
     const raylib::Vector3 tetra_center_of_mass = (a + b + c) / 4.f;
 
     _mass += tetra_mass;
-    _center_of_mass += tetra_center_of_mass * tetra_mass;
+    center_of_mass += tetra_center_of_mass * tetra_mass;
 
     const auto Tet3I = a * a + b * b + c * c + a * b + a * c + b * c;
 
@@ -84,7 +84,7 @@ Polyhedron::Polyhedron(
   }
 
   // Normalize center of mass
-  _center_of_mass /= _mass;
+  center_of_mass /= _mass;
 
   // Scale tensor by factored constants
   I = I * _density / 60.f;
@@ -92,16 +92,16 @@ Polyhedron::Polyhedron(
 
   // Center of mass correction using Steiner's method
   const raylib::Vector3 com_distance{
-      square(_center_of_mass.y) + square(_center_of_mass.z),
-      square(_center_of_mass.x) + square(_center_of_mass.z),
-      square(_center_of_mass.x) + square(_center_of_mass.y)
+      square(center_of_mass.y) + square(center_of_mass.z),
+      square(center_of_mass.x) + square(center_of_mass.z),
+      square(center_of_mass.x) + square(center_of_mass.y)
   };
   I -= com_distance * _mass;
 
   const raylib::Vector3 com_distance_prime{
-      _center_of_mass.y * _center_of_mass.z,
-      _center_of_mass.x * _center_of_mass.y,
-      _center_of_mass.x * _center_of_mass.z
+      center_of_mass.y * center_of_mass.z,
+      center_of_mass.x * center_of_mass.y,
+      center_of_mass.x * center_of_mass.z
   };
   Iprime -= com_distance_prime * _mass;
 
@@ -121,8 +121,18 @@ Polyhedron::Polyhedron(
       0.f,
   };
 
-  std::println("mass: {}, center of mass: {}", _mass, _center_of_mass);
+  std::println("mass: {}, center of mass: {}", _mass, center_of_mass);
   std::println("inertia tensor: {}", _inertia_tensor);
+
+  // Move mesh origin to the center of mass
+  for (auto &vertex : mesh_vertices) {
+    vertex -= center_of_mass;
+  }
+  for (auto &[a, b, c, n] : _faces) {
+    a -= center_of_mass;
+    b -= center_of_mass;
+    c -= center_of_mass;
+  }
 };
 
 float Polyhedron::moment_of_inertia(const raylib::Vector3 &axis) {

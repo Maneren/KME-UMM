@@ -31,7 +31,6 @@ private:
   const float _density;
 
   raylib::Matrix _inertia_tensor;
-  raylib::Vector3 _center_of_mass;
   float _mass;
 
   std::vector<std::tuple<
