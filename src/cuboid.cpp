@@ -3,6 +3,7 @@
 #include <print>
 #include <raymath.h>
 #include <rlgl.h>
+#include <vector>
 
 constexpr raylib::Vector3
 aerodynamic_drag(const raylib::Vector3 &velocity, const float area) {
@@ -39,16 +40,58 @@ constexpr raylib::Vector3 friction(
 }
 
 void Cuboid::update(float delta) {
-  if (_position.y <= _size.y / 2) {
-    _position.y = _size.y / 2;
+  // // iterate over vertices of the cuboid
+  const auto half_size = _size / 2.f;
 
-    if (_velocity.y < 0.1f) {
-      _velocity.y = 0.0f;
-      _acceleration += friction(_velocity, GRAVITY * _mass, _material);
-    } else {
-      _velocity.y *= -BOUNCE_COEFFICIENT;
+  const std::array<raylib::Vector3, 8> vertex_offsets = {
+      raylib::Vector3{half_size.x, half_size.y, half_size.z},
+      raylib::Vector3{-half_size.x, half_size.y, half_size.z},
+      raylib::Vector3{half_size.x, -half_size.y, half_size.z},
+      raylib::Vector3{-half_size.x, -half_size.y, half_size.z},
+      raylib::Vector3{half_size.x, half_size.y, -half_size.z},
+      raylib::Vector3{-half_size.x, half_size.y, -half_size.z},
+      raylib::Vector3{half_size.x, -half_size.y, -half_size.z},
+      raylib::Vector3{-half_size.x, -half_size.y, -half_size.z}
+  };
+
+  auto touching_ground = 0;
+
+  for (auto &vertex_offset : vertex_offsets) {
+    const auto vertex = _position + vertex_offset;
+
+    if (vertex.y < 0) {
+      touching_ground++;
     }
   }
+
+  for (auto &vertex_offset : vertex_offsets) {
+    const auto vertex = _position + vertex_offset;
+
+    if (vertex.y < 0) {
+      const auto vertex_velocity =
+          _velocity + _angular_velocity * vertex_offset.Length();
+      std::println(
+          "vertex_velocity: {}, offset: {}, point: {} ({})",
+          vertex_velocity,
+          vertex_offset,
+          vertex,
+          touching_ground
+      );
+
+      apply_force(-GRAVITY * _mass / touching_ground, vertex_offset);
+    }
+  }
+
+  // if (_position.y <= _size.y / 2) {
+  //   _position.y = _size.y / 2;
+  //
+  //   if (_velocity.y < 0.1f) {
+  //     _velocity.y = 0.0f;
+  //     _acceleration += friction(_velocity, GRAVITY * _mass, _material);
+  //   } else {
+  //     _velocity.y *= -BOUNCE_COEFFICIENT;
+  //   }
+  // }
 
   body_update(delta);
 }
