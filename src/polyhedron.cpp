@@ -5,12 +5,14 @@
 
 Polyhedron::Polyhedron(
     const raylib::MeshUnmanaged &mesh,
+    const float density,
     const raylib::Color &color,
     const BodyMaterial &material,
     const raylib::Vector3 &position,
     const raylib::Quaternion &orientation
 )
-    : Body(position, orientation), _mesh(mesh), _material(material) {
+    : Body(position, orientation), _mesh(mesh), _material(material),
+      _density(density) {
   _color = color;
 
   const std::span<raylib::Vector3> mesh_vertices(

@@ -10,6 +10,7 @@ class Polyhedron final : public Body {
 public:
   Polyhedron(
       const raylib::MeshUnmanaged &mesh,
+      const float density,
       const raylib::Color &color,
       const BodyMaterial &material,
       const raylib::Vector3 &position = raylib::Vector3::Zero(),
@@ -27,7 +28,7 @@ private:
   raylib::MeshUnmanaged _mesh;
   const BodyMaterial _material;
 
-  const float _density = 1000.0f;
+  const float _density;
 
   raylib::Matrix _inertia_tensor;
   raylib::Vector3 _center_of_mass;

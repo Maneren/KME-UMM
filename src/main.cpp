@@ -44,13 +44,14 @@ int main() {
   const BodyMaterial steel{0.8f, 0.6f};
   const BodyMaterial rubber{1.0f, 0.85f};
 
-  const auto cube_mesh = raylib::MeshUnmanaged::Cube(4.0f, 2.0f, 2.0f);
+  const auto cube_mesh = raylib::MeshUnmanaged::Cube(2.0f, 2.0f, 2.0f);
 
   std::shared_ptr<Body> cube = std::make_shared<Polyhedron>(
       cube_mesh,
+      100.f,
       raylib::Color::Black(),
       steel,
-      raylib::Vector3{0.0f, 2.0f, 0.0f}
+      raylib::Vector3{0.0f, 1.0f, 8.0f}
   );
 
   std::vector<std::shared_ptr<Object>> game_objects;
@@ -114,8 +115,21 @@ int main() {
   joint2->anchor_a(raylib::Vector3{1.0f, .0f, -1.0f})
       .anchor_b(raylib::Vector3{1.0f, .0f, 1.0f});
 
+  std::shared_ptr<Joint> joint3 = std::make_shared<SpringJoint>(
+      std::static_pointer_cast<Body>(cube1),
+      std::static_pointer_cast<Body>(cube),
+      raylib::Color::Green(),
+      1000.f,
+      8.f,
+      0.4f
+  );
+
+  joint3->anchor_a(raylib::Vector3{1.0f, .0f, 1.0f})
+      .anchor_b(raylib::Vector3{-1.0f, .0f, -1.0f});
+
   game_objects.push_back(joint);
   game_objects.push_back(joint2);
+  game_objects.push_back(joint3);
 
   for (auto &object : game_objects) {
     object->initialize();
