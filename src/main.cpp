@@ -29,7 +29,7 @@ int main() {
 
   rlEnableBackfaceCulling();
 
-  window.SetTargetFPS(100);
+  window.SetTargetFPS(30);
 
   // Initialize the camera
   raylib::Camera3D camera{
@@ -50,7 +50,7 @@ int main() {
       raylib::Vector3{2.0f, 2.0f, 2.0f},
       raylib::Color::Red(),
       rubber,
-      raylib::Vector3{5.0f, 0.0f, 0.0f}
+      raylib::Vector3{5.0f, 1.0f, 0.0f}
   );
 
   cube1->mass(1000.f);
@@ -61,7 +61,7 @@ int main() {
       raylib::Vector3{2.0f, 2.f, 6.0f},
       raylib::Color::Blue(),
       lubricated,
-      raylib::Vector3{-5.0f, 0.0f, 0.0f}
+      raylib::Vector3{-5.0f, 1.0f, 0.0f}
   );
 
   cube2->mass(1000.f);
@@ -72,7 +72,7 @@ int main() {
       raylib::Vector3{2.0f, 2.f, 2.0f},
       raylib::Color::Yellow(),
       steel,
-      raylib::Vector3{5.0f, 0.0f, -9.0f}
+      raylib::Vector3{5.0f, 1.0f, -9.0f}
   );
 
   game_objects.push_back(cube3);
@@ -83,9 +83,9 @@ int main() {
       std::static_pointer_cast<Body>(cube1),
       std::static_pointer_cast<Body>(cube2),
       raylib::Color::Green(),
-      10.f,
+      1000.f,
       8.f,
-      0.2f
+      0.4f
   );
 
   joint->anchor_a(raylib::Vector3{-1.0f, .0f, 1.0f})
@@ -95,9 +95,9 @@ int main() {
       std::static_pointer_cast<Body>(cube1),
       std::static_pointer_cast<Body>(cube3),
       raylib::Color::Green(),
-      10.f,
+      1000.f,
       8.f,
-      0.2f
+      0.4f
   );
 
   joint2->anchor_a(raylib::Vector3{1.0f, .0f, -1.0f})
@@ -110,7 +110,6 @@ int main() {
     object->initialize();
   }
 
-  raylib::Vector3 random_force{0.0f, 0.0f, 0.0f};
 
   //--------------------------------------------------------------------------------------
 
@@ -119,7 +118,7 @@ int main() {
   {
     // Update
     //----------------------------------------------------------------------------------
-    float delta = window.GetFrameTime();
+    float delta = window.GetFrameTime() / 10.f;
     std::println("\n\ndelta: {}", delta);
 
     if (delta >= EPSILON) {
@@ -142,6 +141,7 @@ int main() {
       std::erase_if(game_objects, [](const auto &object) {
         return !object->alive;
       });
+
       const auto move_force = 10000.f;
 
       if (IsKeyDown(KEY_SPACE)) {
