@@ -24,12 +24,10 @@ int main() {
       screenWidth,
       screenHeight,
       "UMM Car simulator",
-      FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT //| FLAG_VSYNC_HINT
+      FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT
   );
 
   rlEnableBackfaceCulling();
-
-  window.SetTargetFPS(30);
 
   // Initialize the camera
   raylib::Camera3D camera{
@@ -136,15 +134,19 @@ int main() {
   }
   //--------------------------------------------------------------------------------------
 
+  // Physics step time in seconds
+  constexpr float STEP_TIME = 1.e-2f;
+  double physics_time = 0.0f;
+
   // Main game loop
   while (!window.ShouldClose()) // Detect window close button or ESC key
   {
     // Update
     //----------------------------------------------------------------------------------
-    float delta = window.GetFrameTime() / 10.f;
-    std::println("\n\ndelta: {}", delta);
+    const auto simulation_time = window.GetTime();
 
-    if (delta >= EPSILON) {
+    while (physics_time < simulation_time) {
+      physics_time += STEP_TIME;
 
       // Apply gravity
       cube1->apply_force(GRAVITY * cube1->mass());
@@ -156,7 +158,7 @@ int main() {
       // Update all alive objects
       for (const auto &object : game_objects) {
         if (object->alive) {
-          object->update(delta);
+          object->update(STEP_TIME);
         }
       }
 
