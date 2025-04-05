@@ -2,23 +2,29 @@
 #include "utils.hpp"
 #include <print>
 #include <ranges>
+#include <vector>
 
 Polyhedron::Polyhedron(
-    const raylib::MeshUnmanaged &mesh,
+    raylib::Mesh &&mesh,
     const float density,
     const raylib::Color &color,
     const BodyMaterial &material,
     const raylib::Vector3 &position,
     const raylib::Quaternion &orientation
 )
-    : Body(position, orientation), _mesh(mesh), _material(material),
-      _density(density) {
+    : Body(position, orientation), _mesh(std::forward<raylib::Mesh>(mesh)),
+      _material(material), _density(density) {
   _color = color;
 
   const std::span<raylib::Vector3> mesh_vertices(
-      reinterpret_cast<raylib::Vector3 *>(mesh.vertices), mesh.vertexCount
+      reinterpret_cast<raylib::Vector3 *>(_mesh.vertices), _mesh.vertexCount
   );
-  const std::span<unsigned short> indices(mesh.indices, mesh.triangleCount * 3);
+
+  _vertices.assign(mesh_vertices.begin(), mesh_vertices.end());
+
+  const std::span<unsigned short> indices(
+      _mesh.indices, _mesh.triangleCount * 3
+  );
 
   const auto triangles = indices |
                          std::views::transform([&mesh_vertices](auto i) {
@@ -106,7 +112,7 @@ Polyhedron::Polyhedron(
   Iprime -= com_distance_prime * _mass;
 
   // Arrange the vector components into a 3x3 matrix
-  _inertia_tensor = raylib::Matrix{
+  const auto inertia_tensor = raylib::Matrix{
       I.x,
       -Iprime.y,
       -Iprime.z,
@@ -121,8 +127,11 @@ Polyhedron::Polyhedron(
       0.f,
   };
 
+  _inverse_inertia_tensor = raylib::Vector3{1.f / I.x, 1.f / I.y, 1.f / I.z};
+
   std::println("mass: {}, center of mass: {}", _mass, center_of_mass);
-  std::println("inertia tensor: {}", _inertia_tensor);
+  std::println("inertia tensor: {}", inertia_tensor);
+  std::println("inverse inertia tensor: {}", _inverse_inertia_tensor);
 
   // Move mesh origin to the center of mass
   for (auto &vertex : mesh_vertices) {
@@ -136,5 +145,10 @@ Polyhedron::Polyhedron(
 };
 
 float Polyhedron::moment_of_inertia(const raylib::Vector3 &axis) {
-  return axis.Transform(_inertia_tensor).DotProduct(axis);
+  raylib::Matrix R = _orientation.ToMatrix();
+
+  const auto rotated_inverse_inertia_tensor =
+      R * diagonal_matrix(_inverse_inertia_tensor) * R.Transpose();
+
+  return axis.Transform(_inverse_inertia_tensor.Invert()).DotProduct(axis);
 }

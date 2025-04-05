@@ -77,20 +77,20 @@ void Cuboid::update(float delta) {
           touching_ground
       );
 
-      apply_force(-GRAVITY * _mass / touching_ground, vertex_offset);
+      // apply_force(-GRAVITY * _mass / touching_ground, vertex_offset);
     }
   }
 
-  // if (_position.y <= _size.y / 2) {
-  //   _position.y = _size.y / 2;
-  //
-  //   if (_velocity.y < 0.1f) {
-  //     _velocity.y = 0.0f;
-  //     _acceleration += friction(_velocity, GRAVITY * _mass, _material);
-  //   } else {
-  //     _velocity.y *= -BOUNCE_COEFFICIENT;
-  //   }
-  // }
+  if (_position.y <= _size.y / 2) {
+    _position.y = _size.y / 2;
+
+    if (_velocity.y < 0.1f) {
+      _velocity.y = 0.0f;
+      _acceleration += friction(_velocity, GRAVITY * _mass, _material);
+    } else {
+      _velocity.y *= -BOUNCE_COEFFICIENT;
+    }
+  }
 
   body_update(delta);
 }

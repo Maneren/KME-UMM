@@ -3,6 +3,7 @@
 #include "consts.hpp"
 #include "defs.hpp"
 #include "object.hpp"
+#include "utils.hpp"
 #include <Image.hpp>
 #include <Material.hpp>
 #include <Mesh.hpp>
@@ -18,6 +19,14 @@ class Body : public Object {
 public:
   Body(const raylib::Vector3 &position, const raylib::Quaternion &orientation)
       : _position(position), _orientation(orientation) {}
+
+  ~Body() {
+    if (_texture.IsValid())
+      _texture.Unload();
+
+    if (_mesh.IsValid())
+      _mesh.Unload();
+  };
 
   Body &position(const raylib::Vector3 &position) {
     this->_position = position;
@@ -67,7 +76,7 @@ public:
     raylib::Image image = raylib::Image::Color(1, 1, _color);
     _texture = raylib::Texture(image);
 
-    _mesh = create_mesh();
+    _mesh = get_mesh();
     _model.Load(_mesh);
     _model.transform = _orientation.ToMatrix();
     _model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = _texture;
@@ -104,7 +113,7 @@ protected:
   float _mass = 1.0f;
 
   raylib::Quaternion _orientation;
-  raylib::Vector3 _angular_velocity = raylib::Vector3::Zero();
+  raylib::Vector3 _angular_momentum = raylib::Vector3::Zero();
   raylib::Vector3 _angular_acceleration = raylib::Vector3::Zero();
 
   raylib::Model _model;
@@ -112,7 +121,9 @@ protected:
   raylib::Color _color = raylib::Color::White();
   raylib::Texture2D _texture;
 
-  virtual raylib::MeshUnmanaged create_mesh() = 0;
+  virtual raylib::MeshUnmanaged get_mesh() = 0;
+
+  virtual raylib::Vector3 inverse_inertia_tensor() = 0;
 
   void body_apply_force(
       const raylib::Vector3 &force, const raylib::Vector3 &offset
@@ -155,12 +166,18 @@ private:
   }
 
   void update_orientation(const float delta) {
-    _angular_velocity += _angular_acceleration * delta;
+    raylib::Matrix R = _model.transform;
+
+    const auto angular_velocity = _angular_momentum.Transform(
+        R * diagonal_matrix(inverse_inertia_tensor()) * R.Transpose()
+    );
+
+    _angular_acceleration *delta;
 
     std::println(
         "angular_acceleration: {}, angular_velocity: {}",
         _angular_acceleration,
-        _angular_velocity
+        angular_velocity
     );
 
     _angular_acceleration = raylib::Vector3::Zero();

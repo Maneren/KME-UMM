@@ -8,8 +8,12 @@
 
 class Polyhedron final : public Body {
 public:
+  using Vertices = std::span<raylib::Vector3>;
+  using Face = std::
+      tuple<raylib::Vector3, raylib::Vector3, raylib::Vector3, raylib::Vector3>;
+
   Polyhedron(
-      const raylib::MeshUnmanaged &mesh,
+      raylib::Mesh &&mesh,
       const float density,
       const raylib::Color &color,
       const BodyMaterial &material,
@@ -21,22 +25,21 @@ public:
 
   float moment_of_inertia(const raylib::Vector3 &axis) override;
 
+  Vertices vertices() { return _vertices; }
+  std::span<Face> faces() { return _faces; }
+
 protected:
-  raylib::MeshUnmanaged create_mesh() override { return _mesh; }
+  raylib::MeshUnmanaged get_mesh() override { return std::move(_mesh); }
 
 private:
-  raylib::MeshUnmanaged _mesh;
+  raylib::Mesh _mesh;
   const BodyMaterial _material;
 
   const float _density;
 
-  raylib::Matrix _inertia_tensor;
+  raylib::Vector3 _inverse_inertia_tensor;
   float _mass;
 
-  std::vector<std::tuple<
-      raylib::Vector3,
-      raylib::Vector3,
-      raylib::Vector3,
-      raylib::Vector3>>
-      _faces;
+  std::vector<raylib::Vector3> _vertices;
+  std::vector<Face> _faces;
 };

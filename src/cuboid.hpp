@@ -1,9 +1,9 @@
 #pragma once
 
-#include <Mesh.hpp>
 #include "body.hpp"
 #include "material.hpp"
 #include <Color.hpp>
+#include <Mesh.hpp>
 #include <Vector3.hpp>
 
 class Cuboid final : public Body {
@@ -26,7 +26,7 @@ public:
   float moment_of_inertia(const raylib::Vector3 &axis) override;
 
 protected:
-  raylib::MeshUnmanaged create_mesh() override {
+  raylib::MeshUnmanaged get_mesh() override {
     return raylib::MeshUnmanaged::Cube(_size.x, _size.y, _size.z);
   }
 
