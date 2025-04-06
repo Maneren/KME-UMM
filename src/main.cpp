@@ -31,7 +31,7 @@ int main() {
 
   // Initialize the camera
   raylib::Camera3D camera{
-      {30.0f, 20.0f, 30.0f},
+      {3.0f, 2.0f, 3.0f},
       {0.0f, 0.0f, 0.0f},
       {0.0f, 1.0f, 0.0f},
       70.0f,
@@ -60,9 +60,11 @@ int main() {
       raylib::Vector3{0.0f, 8.0f, 0.0f}
   );
 
+  cube->initialize();
+
   game_objects.push_back(cube);
 
-  cube->apply_force({0.0f, 0.0f, 10.f}, raylib::Vector3{0.1f, 3.0f, 0.0f});
+  cube->apply_force({0.0f, 0.0f, 100.f}, raylib::Vector3{0.f, 3.0f, 0.0f});
 
   // std::shared_ptr<Body> cube1 = std::make_shared<Cuboid>(
   //     raylib::Vector3{2.0f, 2.0f, 2.0f},
@@ -171,10 +173,10 @@ int main() {
   // );
   //
   // game_objects.push_back(polyhedron2);
-
-  for (auto &object : game_objects) {
-    object->initialize();
-  }
+  //
+  // for (auto &object : game_objects) {
+  //   object->initialize();
+  // }
   //--------------------------------------------------------------------------------------
 
   // Physics step time in seconds
