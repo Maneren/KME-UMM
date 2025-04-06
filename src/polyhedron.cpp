@@ -111,7 +111,7 @@ Polyhedron::Polyhedron(
   };
   Iprime -= com_distance_prime * _mass;
 
-  // Arrange the vector components into a 3x3 matrix
+  // Arrange the vector components into a matrix
   const auto inertia_tensor = raylib::Matrix{
       I.x,
       -Iprime.y,
@@ -125,9 +125,13 @@ Polyhedron::Polyhedron(
       -Iprime.x,
       I.z,
       0.f,
+      0.f,
+      0.f,
+      0.f,
+      1.f
   };
 
-  _inverse_inertia_tensor = raylib::Vector3{1.f / I.x, 1.f / I.y, 1.f / I.z};
+  _inverse_inertia_tensor = inertia_tensor.Invert();
 
   std::println("mass: {}, center of mass: {}", _mass, center_of_mass);
   std::println("inertia tensor: {}", inertia_tensor);
@@ -143,12 +147,3 @@ Polyhedron::Polyhedron(
     c -= center_of_mass;
   }
 };
-
-float Polyhedron::moment_of_inertia(const raylib::Vector3 &axis) {
-  raylib::Matrix R = _orientation.ToMatrix();
-
-  const auto rotated_inverse_inertia_tensor =
-      R * diagonal_matrix(_inverse_inertia_tensor) * R.Transpose();
-
-  return axis.Transform(_inverse_inertia_tensor.Invert()).DotProduct(axis);
-}

@@ -10,7 +10,6 @@
 #include <Color.hpp>
 #include <Vector3.hpp>
 #include <Window.hpp>
-#include <format>
 #include <memory>
 #include <print>
 #include <raylib.h>
@@ -44,6 +43,26 @@ int main() {
   const BodyMaterial rubber{1.0f, 0.85f};
 
   std::vector<std::shared_ptr<Object>> game_objects;
+
+  // std::shared_ptr<Body> cube = std::make_shared<Cuboid>(
+  //     raylib::Vector3{0.4f, 1.0f, 0.1f},
+  //     raylib::Color::Red(),
+  //     rubber,
+  //     raylib::Vector3{0.0f, 8.0f, 0.0f}
+  // );
+  // cube->mass(1.f);
+
+  std::shared_ptr<Body> cube = std::make_shared<Polyhedron>(
+      raylib::Mesh::Cube(0.4f, 1.0f, 0.1f),
+      7500.f,
+      raylib::Color::Red(),
+      rubber,
+      raylib::Vector3{0.0f, 8.0f, 0.0f}
+  );
+
+  game_objects.push_back(cube);
+
+  cube->apply_force({0.0f, 0.0f, 10.f}, raylib::Vector3{0.1f, 3.0f, 0.0f});
 
   // std::shared_ptr<Body> cube1 = std::make_shared<Cuboid>(
   //     raylib::Vector3{2.0f, 2.0f, 2.0f},
@@ -126,32 +145,32 @@ int main() {
   // game_objects.push_back(joint);
   // game_objects.push_back(joint2);
   // game_objects.push_back(joint3);
+
+  // std::shared_ptr<Polyhedron> polyhedron1 = std::make_shared<Polyhedron>(
+  //     raylib::Mesh::Cube(2.0f, 2.0f, 2.0f),
+  //     1000.f,
+  //     raylib::Color::Red(),
+  //     steel,
+  //     raylib::Vector3{0.0f, 1.0f, 0.0f}
+  // );
   //
-  std::shared_ptr<Polyhedron> polyhedron1 = std::make_shared<Polyhedron>(
-      raylib::Mesh::Cube(2.0f, 2.0f, 2.0f),
-      1000.f,
-      raylib::Color::Red(),
-      steel,
-      raylib::Vector3{0.0f, 1.0f, 0.0f}
-  );
-
-  game_objects.push_back(polyhedron1);
-
-  std::shared_ptr<Polyhedron> polyhedron2 = std::make_shared<Polyhedron>(
-      raylib::Mesh::Cube(2.0f, 2.0f, 2.0f),
-      1000.f,
-      raylib::Color::Blue(),
-      steel,
-      raylib::Vector3{2.0f, 1.0f, 0.0f},
-      raylib::Quaternion::FromAxisAngle(
-          raylib::Vector3{0.0f, 1.0f, 0.0f}, PI / 6
-      ) *
-          raylib::Quaternion::FromAxisAngle(
-              raylib::Vector3{0.0f, 0.0f, 1.0f}, PI / 6
-          )
-  );
-
-  game_objects.push_back(polyhedron2);
+  // game_objects.push_back(polyhedron1);
+  //
+  // std::shared_ptr<Polyhedron> polyhedron2 = std::make_shared<Polyhedron>(
+  //     raylib::Mesh::Cube(2.0f, 2.0f, 2.0f),
+  //     1000.f,
+  //     raylib::Color::Blue(),
+  //     steel,
+  //     raylib::Vector3{2.0f, 1.0f, 0.0f},
+  //     raylib::Quaternion::FromAxisAngle(
+  //         raylib::Vector3{0.0f, 1.0f, 0.0f}, PI / 6
+  //     ) *
+  //         raylib::Quaternion::FromAxisAngle(
+  //             raylib::Vector3{0.0f, 0.0f, 1.0f}, PI / 6
+  //         )
+  // );
+  //
+  // game_objects.push_back(polyhedron2);
 
   for (auto &object : game_objects) {
     object->initialize();
@@ -159,7 +178,7 @@ int main() {
   //--------------------------------------------------------------------------------------
 
   // Physics step time in seconds
-  constexpr float STEP_TIME = 1.e-1f;
+  constexpr float STEP_TIME = 1.e-2f;
   double physics_time = 0.0f;
 
   // Main game loop
@@ -170,6 +189,11 @@ int main() {
     const auto simulation_time = window.GetTime();
 
     while (physics_time < simulation_time) {
+      std::println(
+          "\n\nStepping physics... {} -> {}",
+          physics_time,
+          physics_time + STEP_TIME
+      );
       physics_time += STEP_TIME;
 
       // Apply gravity
@@ -184,18 +208,18 @@ int main() {
         }
       }
 
-      const auto collision =
-          detect_polyhedron_collision(polyhedron1, polyhedron2);
-
-      if (collision.has_value()) {
-        const auto &value = collision.value();
-        std::println(
-            "collision: normal: {}, point: {}, depth: {}",
-            value.normal,
-            value.penetration_point,
-            value.depth
-        );
-      }
+      // const auto collision =
+      //     detect_polyhedron_collision(polyhedron1, polyhedron2);
+      //
+      // if (collision.has_value()) {
+      //   const auto &value = collision.value();
+      //   std::println(
+      //       "collision: normal: {}, point: {}, depth: {}",
+      //       value.normal,
+      //       value.penetration_point,
+      //       value.depth
+      //   );
+      // }
 
       // Remove dead objects
       std::erase_if(game_objects, [](const auto &object) {
@@ -203,29 +227,30 @@ int main() {
       });
     }
 
-    const auto move_force = 10000.f;
-
-    if (IsKeyDown(KEY_SPACE)) {
-      polyhedron1->apply_force(-GRAVITY * 1500.f);
-    }
-
-    if (IsKeyDown(KEY_W)) {
-      polyhedron1->apply_force(raylib::Vector3{0.0f, 0.0f, -move_force});
-    }
-
-    if (IsKeyDown(KEY_S)) {
-      polyhedron1->apply_force(raylib::Vector3{0.0f, 0.0f, move_force});
-    }
-
-    if (IsKeyDown(KEY_A)) {
-      polyhedron1->apply_force(raylib::Vector3{-move_force, 0.0f, 0.0f});
-    }
-
-    if (IsKeyDown(KEY_D)) {
-      polyhedron1->apply_force(raylib::Vector3{move_force, 0.0f, 0.0f});
-    }
-
-    camera.target = (polyhedron1->position() + polyhedron1->position()) / 2.f;
+    // const auto move_force = 10000.f;
+    //
+    // if (IsKeyDown(KEY_SPACE)) {
+    //   cube1->apply_force(-GRAVITY * 1500.f);
+    // }
+    //
+    // if (IsKeyDown(KEY_W)) {
+    //   cube1->apply_force(raylib::Vector3{0.0f, 0.0f, -move_force});
+    // }
+    //
+    // if (IsKeyDown(KEY_S)) {
+    //   cube1->apply_force(raylib::Vector3{0.0f, 0.0f, move_force});
+    // }
+    //
+    // if (IsKeyDown(KEY_A)) {
+    //   cube1->apply_force(raylib::Vector3{-move_force, 0.0f, 0.0f});
+    // }
+    //
+    // if (IsKeyDown(KEY_D)) {
+    //   cube1->apply_force(raylib::Vector3{move_force, 0.0f, 0.0f});
+    // }
+    //
+    // camera.target = (cube1->position() + cube2->position()) / 2.f;
+    camera.target = cube->position();
     camera.Update(CAMERA_THIRD_PERSON);
     //----------------------------------------------------------------------------------
 

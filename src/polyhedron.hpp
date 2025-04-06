@@ -23,7 +23,9 @@ public:
 
   ~Polyhedron() = default;
 
-  float moment_of_inertia(const raylib::Vector3 &axis) override;
+  const raylib::Matrix &inverse_body_inertia_tensor() const override {
+    return _inverse_inertia_tensor;
+  }
 
   Vertices vertices() { return _vertices; }
   std::span<Face> faces() { return _faces; }
@@ -37,7 +39,7 @@ private:
 
   const float _density;
 
-  raylib::Vector3 _inverse_inertia_tensor;
+  raylib::Matrix _inverse_inertia_tensor;
   float _mass;
 
   std::vector<raylib::Vector3> _vertices;

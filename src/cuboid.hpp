@@ -2,6 +2,7 @@
 
 #include "body.hpp"
 #include "material.hpp"
+#include "utils.hpp"
 #include <Color.hpp>
 #include <Mesh.hpp>
 #include <Vector3.hpp>
@@ -23,9 +24,17 @@ public:
 
   void update(const float delta) override;
 
-  float moment_of_inertia(const raylib::Vector3 &axis) override;
+  Body &mass(const float mass) {
+    this->_mass = mass;
+    update_inertia();
+    return *this;
+  }
 
 protected:
+  const raylib::Matrix &inverse_body_inertia_tensor() const override {
+    return _inverse_inertia_tensor;
+  }
+
   raylib::MeshUnmanaged get_mesh() override {
     return raylib::MeshUnmanaged::Cube(_size.x, _size.y, _size.z);
   }
@@ -33,4 +42,16 @@ protected:
 private:
   raylib::Vector3 _size;
   const BodyMaterial _material;
+  raylib::Matrix _inverse_inertia_tensor;
+
+  void update_inertia() {
+    const auto x = _size.x;
+    const auto y = _size.y;
+    const auto z = _size.z;
+
+    const raylib::Vector3 base_tensor{
+        (y * y + z * z), (x * x + z * z), (x * x + y * y)
+    };
+    _inverse_inertia_tensor = diagonal_matrix(base_tensor * _mass / 12.f);
+  }
 };

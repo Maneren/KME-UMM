@@ -28,8 +28,8 @@ public:
   const raylib::Vector3 &anchor_b() const { return _anchor_b; }
 
   void draw() const override {
-    const auto offset_a = _body_a->transform_offset(_anchor_a);
-    const auto offset_b = _body_b->transform_offset(_anchor_b);
+    const auto offset_a = _body_a->transform_point(_anchor_a);
+    const auto offset_b = _body_b->transform_point(_anchor_b);
 
     const auto position_a = _body_a->position() + offset_a;
     const auto position_b = _body_b->position() + offset_b;

@@ -18,7 +18,7 @@
 class Body : public Object {
 public:
   Body(const raylib::Vector3 &position, const raylib::Quaternion &orientation)
-      : _position(position), _orientation(orientation) {}
+      : _position(position), _orientation(orientation.ToMatrix()) {}
 
   ~Body() {
     if (_texture.IsValid())
@@ -33,11 +33,11 @@ public:
     return *this;
   }
   Body &velocity(const raylib::Vector3 &velocity) {
-    this->_velocity = velocity;
+    this->_linear_momentum = velocity;
     return *this;
   }
   Body &acceleration(const raylib::Vector3 &acceleration) {
-    this->_acceleration = acceleration;
+    this->_force = acceleration;
     return *this;
   }
   Body &mass(const float mass) {
@@ -45,15 +45,11 @@ public:
     return *this;
   }
   Body &orientation(const raylib::Quaternion &orientation) {
-    this->_orientation = orientation;
-    return *this;
-  }
-  Body &angular_velocity(const raylib::Vector3 &angular_velocity) {
-    this->_angular_velocity = angular_velocity;
+    this->_orientation = orientation.ToMatrix();
     return *this;
   }
   Body &angular_acceleration(const raylib::Vector3 &angular_acceleration) {
-    this->_angular_acceleration = angular_acceleration;
+    this->_torque = angular_acceleration;
     return *this;
   }
   Body &texture(raylib::Texture &&texture) {
@@ -61,15 +57,23 @@ public:
     return *this;
   }
 
-  const raylib::Vector3 &position() const { return _position; };
-  const raylib::Vector3 &velocity() const { return _velocity; }
-  const raylib::Vector3 &acceleration() const { return _acceleration; };
   float mass() const { return _mass; }
-  const raylib::Quaternion &orientation() const { return _orientation; }
-  const raylib::Vector3 &angular_velocity() const { return _angular_velocity; }
-  const raylib::Vector3 &angular_acceleration() const {
-    return _angular_acceleration;
+
+  const raylib::Vector3 &position() const { return _position; };
+  const raylib::Vector3 &linear_momentum() const { return _linear_momentum; }
+  const raylib::Vector3 velocity() const { return _linear_momentum / _mass; }
+  const raylib::Vector3 &force() const { return _force; }
+
+  const raylib::Quaternion orientation() const {
+    return raylib::Quaternion::FromMatrix(_orientation);
   }
+  const raylib::Matrix &orientation_matrix() const { return _orientation; }
+  const raylib::Vector3 &angular_momentum() const { return _angular_momentum; }
+  const raylib::Vector3 angular_velocity() const {
+    return _angular_momentum.Transform(inverse_inertia_tensor());
+  }
+  const raylib::Vector3 &torque() const { return _torque; }
+
   const raylib::Texture &texture() const { return _texture; }
 
   virtual void initialize() override {
@@ -78,19 +82,25 @@ public:
 
     _mesh = get_mesh();
     _model.Load(_mesh);
-    _model.transform = _orientation.ToMatrix();
+    _model.transform = _orientation;
     _model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = _texture;
   }
 
   virtual void draw() const override {
     _model.Draw(_position, 1.0f, raylib::Color::White());
+
+    _position.DrawLine3D(
+        _position + angular_momentum() * 1000, raylib::Color::Green()
+    );
+    _position.DrawLine3D(
+        _position + transform_point(angular_velocity() * 500),
+        raylib::Color::Blue()
+    );
   }
 
-  raylib::Vector3 transform_point(const raylib::Vector3 &point) {
-    return point.Transform(_model.transform);
+  raylib::Vector3 transform_point(const raylib::Vector3 &point) const {
+    return point.Transform(_orientation);
   }
-
-  virtual float moment_of_inertia(const raylib::Vector3 &axis) = 0;
 
   virtual void apply_force(
       const raylib::Vector3 &force,
@@ -100,21 +110,16 @@ public:
   };
   virtual void update(const float delta) override { body_update(delta); };
 
-  virtual raylib::Vector3 transform_offset(const raylib::Vector3 &offset
-  ) const {
-    return offset.Transform(_model.transform);
-  }
-
 protected:
   raylib::Vector3 _position;
-  raylib::Vector3 _velocity = raylib::Vector3::Zero();
-  raylib::Vector3 _acceleration = raylib::Vector3::Zero();
+  raylib::Vector3 _linear_momentum = raylib::Vector3::Zero();
+  raylib::Vector3 _force = raylib::Vector3::Zero();
 
   float _mass = 1.0f;
 
-  raylib::Quaternion _orientation;
+  raylib::Matrix _orientation;
   raylib::Vector3 _angular_momentum = raylib::Vector3::Zero();
-  raylib::Vector3 _angular_acceleration = raylib::Vector3::Zero();
+  raylib::Vector3 _torque = raylib::Vector3::Zero();
 
   raylib::Model _model;
   raylib::MeshUnmanaged _mesh;
@@ -123,7 +128,12 @@ protected:
 
   virtual raylib::MeshUnmanaged get_mesh() = 0;
 
-  virtual raylib::Vector3 inverse_inertia_tensor() = 0;
+  virtual const raylib::Matrix &inverse_body_inertia_tensor() const = 0;
+
+  const raylib::Matrix inverse_inertia_tensor() const {
+    return _orientation * inverse_body_inertia_tensor() *
+           _orientation.Transpose();
+  }
 
   void body_apply_force(
       const raylib::Vector3 &force, const raylib::Vector3 &offset
@@ -134,68 +144,77 @@ protected:
     if (magnitude <= EPSILON)
       return;
 
-    _acceleration += force / _mass;
+    _force += force;
 
     const auto arm_length = offset.Length();
     if (arm_length <= EPSILON)
       return;
 
     const auto torque =
-        transform_offset(offset).CrossProduct(transform_offset(force));
-    const float moment = moment_of_inertia(torque.Normalize());
-    std::println("moment: {}, torque: {}", moment, torque);
-    _angular_acceleration += torque / moment;
+        transform_point(offset).CrossProduct(transform_point(force));
+    std::println("torque: {}", torque);
+    _torque += torque;
+    std::println();
   };
 
   void body_update(const float delta) {
-    update_position(delta);
+    // update_position(delta);
     update_orientation(delta);
+
+    std::println(
+        "linear_momentum: {} kg m s⁻¹, angular_momentum: {} kg m² s⁻¹",
+        _linear_momentum.Length(),
+        _angular_momentum.Length()
+    );
+    std::println();
   };
 
 private:
   void update_position(const float delta) {
-    _velocity += _acceleration * delta;
-    _position += _velocity * delta;
+    _linear_momentum += _force * delta;
+    const auto velocity = this->velocity();
+    _position += velocity * delta;
     std::println(
-        "position: {}, velocity: {}, acceleration: {}",
+        "position: {}, linear_momentum: {}, velocity: {}",
         _position,
-        _velocity,
-        _acceleration
+        _linear_momentum,
+        velocity
     );
-    _acceleration = raylib::Vector3::Zero();
+    _force = raylib::Vector3::Zero();
+    std::println();
   }
 
   void update_orientation(const float delta) {
-    raylib::Matrix R = _model.transform;
 
-    const auto angular_velocity = _angular_momentum.Transform(
-        R * diagonal_matrix(inverse_inertia_tensor()) * R.Transpose()
-    );
+    _angular_momentum += _torque * delta;
 
-    _angular_acceleration *delta;
+    auto angular_velocity = this->angular_velocity();
 
     std::println(
-        "angular_acceleration: {}, angular_velocity: {}",
-        _angular_acceleration,
+        "torque: {}, angular_momentum: {}, angular_velocity: {}",
+        _torque,
+        _angular_momentum,
         angular_velocity
     );
 
-    _angular_acceleration = raylib::Vector3::Zero();
+    _torque = raylib::Vector3::Zero();
 
-    const auto angle = _angular_velocity.Length();
-
-    if (angle <= EPSILON)
+    if (angular_velocity.Length() <= EPSILON)
       return;
 
-    _angular_velocity *= std::pow(ENVIRONMENT_FRICTION_COEFFICIENT, delta);
-
-    const auto axis = _angular_velocity.Normalize();
-    const auto rotation = raylib::Quaternion::FromAxisAngle(axis, angle);
+    // Friction and other environmental forces
+    // angular_velocity *= std::pow(ENVIRONMENT_FRICTION_COEFFICIENT, delta);
 
     std::println(
-        "orientation: {}, rotation: {} ({})", _orientation, rotation, angle
+        "orientation: {}, angular_velocity: {}", _orientation, angular_velocity
     );
-    _orientation = (_orientation * rotation).Normalize();
-    _model.transform = _orientation.ToMatrix();
+
+    const auto rotation = cross_matrix(angular_velocity) * _orientation;
+    const auto rotated = reorthonormalize(_orientation + rotation);
+
+    std::println("rotation: {}, rotated: {}", rotation, rotated);
+    std::println();
+
+    _model.transform = _orientation = rotated;
   }
 };

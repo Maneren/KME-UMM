@@ -35,93 +35,90 @@ constexpr raylib::Vector3 friction(
       friction,
       friction_force
   );
+  std::println();
   return friction_force;
 }
 
 void Cuboid::update(float delta) {
-  // // iterate over vertices of the cuboid
-  const auto half_size = _size / 2.f;
-
-  const std::array<raylib::Vector3, 8> vertex_offsets = {
-      raylib::Vector3{half_size.x, half_size.y, half_size.z},
-      raylib::Vector3{-half_size.x, half_size.y, half_size.z},
-      raylib::Vector3{half_size.x, -half_size.y, half_size.z},
-      raylib::Vector3{-half_size.x, -half_size.y, half_size.z},
-      raylib::Vector3{half_size.x, half_size.y, -half_size.z},
-      raylib::Vector3{-half_size.x, half_size.y, -half_size.z},
-      raylib::Vector3{half_size.x, -half_size.y, -half_size.z},
-      raylib::Vector3{-half_size.x, -half_size.y, -half_size.z}
-  };
-
-  auto touching_ground = 0;
-
-  for (auto &vertex_offset : vertex_offsets) {
-    const auto vertex = _position + vertex_offset;
-
-    if (vertex.y < 0) {
-      touching_ground++;
-    }
-  }
-
-  for (auto &vertex_offset : vertex_offsets) {
-    const auto vertex = _position + vertex_offset;
-
-    if (vertex.y < 0) {
-      const auto vertex_velocity =
-          _velocity + _angular_velocity * vertex_offset.Length();
-      std::println(
-          "vertex_velocity: {}, offset: {}, point: {} ({})",
-          vertex_velocity,
-          vertex_offset,
-          vertex,
-          touching_ground
-      );
-
-      // apply_force(-GRAVITY * _mass / touching_ground, vertex_offset);
-    }
-  }
+  // iterate over vertices of the cuboid
+  // const auto half_size = _size / 2.f;
+  //
+  // const std::array<raylib::Vector3, 8> vertex_offsets = {
+  //     raylib::Vector3{half_size.x, half_size.y, half_size.z},
+  //     raylib::Vector3{-half_size.x, half_size.y, half_size.z},
+  //     raylib::Vector3{half_size.x, -half_size.y, half_size.z},
+  //     raylib::Vector3{-half_size.x, -half_size.y, half_size.z},
+  //     raylib::Vector3{half_size.x, half_size.y, -half_size.z},
+  //     raylib::Vector3{-half_size.x, half_size.y, -half_size.z},
+  //     raylib::Vector3{half_size.x, -half_size.y, -half_size.z},
+  //     raylib::Vector3{-half_size.x, -half_size.y, -half_size.z}
+  // };
+  //
+  // auto touching_ground = 0;
+  //
+  // for (auto &vertex_offset : vertex_offsets) {
+  //   const auto vertex = _position + vertex_offset;
+  //
+  //   if (vertex.y < 0) {
+  //     touching_ground++;
+  //   }
+  // }
+  //
+  // for (auto &vertex_offset : vertex_offsets) {
+  //   const auto vertex = _position + vertex_offset;
+  //
+  //   if (vertex.y < 0) {
+  //     const auto vertex_velocity =
+  //         _velocity + _angular_velocity * vertex_offset.Length();
+  //     std::println(
+  //         "vertex_velocity: {}, offset: {}, point: {} ({})",
+  //         vertex_velocity,
+  //         vertex_offset,
+  //         vertex,
+  //         touching_ground
+  //     );
+  //
+  //     // apply_force(-GRAVITY * _mass / touching_ground, vertex_offset);
+  //   }
+  // }
 
   if (_position.y <= _size.y / 2) {
     _position.y = _size.y / 2;
 
-    if (_velocity.y < 0.1f) {
-      _velocity.y = 0.0f;
-      _acceleration += friction(_velocity, GRAVITY * _mass, _material);
-    } else {
-      _velocity.y *= -BOUNCE_COEFFICIENT;
-    }
+    // if (_linear_momentum.y < 0.1f) {
+    //   _linear_momentum.y = 0.0f;
+    //   _total_force += friction(_linear_momentum, GRAVITY * _mass, _material);
+    // } else {
+    //   _linear_momentum.y *= -BOUNCE_COEFFICIENT;
+    // }
   }
 
   body_update(delta);
 }
 
-float Cuboid::moment_of_inertia(const raylib::Vector3 &axis) {
-  const auto x = _size.x;
-  const auto y = _size.y;
-  const auto z = _size.z;
-
-  const float I_xx = 1.f / 12.f * _mass * (y * y + z * z);
-  const float I_yy = 1.f / 12.f * _mass * (x * x + z * z);
-  const float I_zz = 1.f / 12.f * _mass * (x * x + y * y);
-
-  const raylib::Matrix inertia_tensor{
-      I_xx,
-      0.f,
-      0.f,
-      0.f,
-      0.f,
-      I_yy,
-      0.f,
-      0.f,
-      0.f,
-      0.f,
-      I_zz,
-      0.f,
-      0.f,
-      0.f,
-      0.f,
-      0.f
-  };
-
-  return axis.Transform(inertia_tensor).DotProduct(axis);
-}
+// float Cuboid::moment_of_inertia(const raylib::Vector3 &axis) {
+//   const auto x = _size.x;
+//   const auto y = _size.y;
+//   const auto z = _size.z;
+//
+//   const raylib::Matrix inertia_tensor{
+//       I_xx,
+//       0.f,
+//       0.f,
+//       0.f,
+//       0.f,
+//       I_yy,
+//       0.f,
+//       0.f,
+//       0.f,
+//       0.f,
+//       I_zz,
+//       0.f,
+//       0.f,
+//       0.f,
+//       0.f,
+//       0.f
+//   };
+//
+//   return axis.Transform(inertia_tensor).DotProduct(axis);
+// }
