@@ -91,7 +91,7 @@ public:
         _position + angular_momentum() * 10, raylib::Color::Green()
     );
     _position.DrawLine3D(
-        _position + transform_point(angular_velocity() * 5),
+        _position + transform_point(angular_velocity() * 50),
         raylib::Color::Blue()
     );
   }
@@ -163,6 +163,25 @@ protected:
         _linear_momentum.Length(),
         _angular_momentum.Length()
     );
+    const auto linear_energy = _linear_momentum.LengthSqr() / (2.0f * _mass);
+
+    const auto angular_velocity = this->angular_velocity();
+    const auto angular_energy =
+        (angular_velocity * angular_velocity)
+            .Transform(inverse_inertia_tensor().Invert())
+            .Length() *
+        0.5f;
+
+    std::println(
+        "linear_energy: {} J + angular_energy: {} J = {}",
+        linear_energy,
+        angular_energy,
+        linear_energy + angular_energy
+    );
+    std::println(
+        "{}",
+        (_angular_momentum.Transform(inverse_inertia_tensor())).LengthSqr()
+    );
     std::println();
   };
 
@@ -184,6 +203,10 @@ private:
   void update_orientation(const float delta) {
     _angular_momentum += _torque * delta;
 
+    // // Friction and other environmental forces
+    // _angular_momentum *=
+    //     std::pow(1.f - ENVIRONMENT_FRICTION_COEFFICIENT, delta);
+
     auto angular_velocity = this->angular_velocity();
 
     std::println(
@@ -198,25 +221,19 @@ private:
     if (angular_velocity.Length() <= EPSILON)
       return;
 
-    // Friction and other environmental forces
-    // angular_velocity *= std::pow(ENVIRONMENT_FRICTION_COEFFICIENT, delta);
-
-    std::println(
-        "orientation: {}, angular_velocity: {}", _orientation, angular_velocity
-    );
-
-    // the formula is 1/2 * angular_velocity quaternion
+    // the formula is 1/2 * angular_velocity as quaternion
     angular_velocity *= 0.5f;
     const raylib::Quaternion rotation(
-        angular_velocity.x, angular_velocity.y, angular_velocity.z, 1
+        angular_velocity.x, angular_velocity.y, angular_velocity.z, 1.f
     );
 
     const auto rotated = (_orientation * rotation).Normalize();
 
-    std::println("rotation: {}, rotated: {}", rotation, rotated);
+    std::println("orientation: {}, rotation: {}", _orientation, rotation);
+    std::println("rotated: {}", rotated);
     std::println();
 
     _orientation = rotated;
-    _model.transform = _orientation.ToMatrix();
+    _model.transform = rotated.ToMatrix();
   }
 };

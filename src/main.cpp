@@ -53,7 +53,7 @@ int main() {
   // cube->mass(1.f);
 
   std::shared_ptr<Body> cube = std::make_shared<Polyhedron>(
-      raylib::Mesh::Cube(0.4f, 1.0f, 0.1f),
+      raylib::Mesh::Cube(0.5f, 1.0f, 0.01f),
       7500.f,
       raylib::Color::Red(),
       rubber,
@@ -64,7 +64,7 @@ int main() {
 
   game_objects.push_back(cube);
 
-  cube->apply_force({0.0f, 0.0f, 100.f}, raylib::Vector3{0.f, 3.0f, 0.0f});
+  cube->apply_force({0.0f, 0.0f, 100.f}, raylib::Vector3{0.00001f, 3.0f, 0.0f});
 
   // std::shared_ptr<Body> cube1 = std::make_shared<Cuboid>(
   //     raylib::Vector3{2.0f, 2.0f, 2.0f},
@@ -180,7 +180,7 @@ int main() {
   //--------------------------------------------------------------------------------------
 
   // Physics step time in seconds
-  constexpr float STEP_TIME = 1.e-2f;
+  constexpr float STEP_TIME = 1.e-3f;
   double physics_time = 0.0f;
 
   // Main game loop
