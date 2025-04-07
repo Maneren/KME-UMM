@@ -40,7 +40,6 @@ private:
   const float _density;
 
   raylib::Matrix _inverse_inertia_tensor;
-  float _mass;
 
   std::vector<raylib::Vector3> _vertices;
   std::vector<Face> _faces;

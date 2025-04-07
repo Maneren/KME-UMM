@@ -31,7 +31,7 @@ int main() {
 
   // Initialize the camera
   raylib::Camera3D camera{
-      {3.0f, 2.0f, 3.0f},
+      {30.0f, 20.0f, 30.0f},
       {0.0f, 0.0f, 0.0f},
       {0.0f, 1.0f, 0.0f},
       70.0f,
@@ -44,6 +44,7 @@ int main() {
 
   std::vector<std::shared_ptr<Object>> game_objects;
 
+  // Cuboid test
   // std::shared_ptr<Body> cube = std::make_shared<Cuboid>(
   //     raylib::Vector3{0.4f, 1.0f, 0.1f},
   //     raylib::Color::Red(),
@@ -52,102 +53,105 @@ int main() {
   // );
   // cube->mass(1.f);
 
-  std::shared_ptr<Body> cube = std::make_shared<Polyhedron>(
-      raylib::Mesh::Cube(0.5f, 1.0f, 0.01f),
-      7500.f,
-      raylib::Color::Red(),
-      rubber,
-      raylib::Vector3{0.0f, 8.0f, 0.0f}
-  );
-
-  cube->initialize();
-
-  game_objects.push_back(cube);
-
-  cube->apply_force({0.0f, 0.0f, 100.f}, raylib::Vector3{0.00001f, 3.0f, 0.0f});
-
-  // std::shared_ptr<Body> cube1 = std::make_shared<Cuboid>(
-  //     raylib::Vector3{2.0f, 2.0f, 2.0f},
+  // Angular momentum test
+  // std::shared_ptr<Body> cube = std::make_shared<Polyhedron>(
+  //     raylib::Mesh::Cube(0.5f, 1.0f, 0.05f),
+  //     7500.f,
   //     raylib::Color::Red(),
   //     rubber,
-  //     raylib::Vector3{5.0f, 1.0f, 0.0f}
+  //     raylib::Vector3{0.0f, 8.0f, 0.0f}
   // );
   //
-  // cube1->mass(1000.f);
+  // cube->initialize();
   //
-  // game_objects.push_back(cube1);
+  // game_objects.push_back(cube);
   //
-  // std::shared_ptr<Body> cube2 = std::make_shared<Cuboid>(
-  //     raylib::Vector3{2.0f, 2.f, 6.0f},
-  //     raylib::Color::Blue(),
-  //     lubricated,
-  //     raylib::Vector3{-5.0f, 1.0f, 0.0f}
-  // );
-  //
-  // cube2->mass(1000.f);
-  //
-  // game_objects.push_back(cube2);
-  //
-  // std::shared_ptr<Body> cube3 = std::make_shared<Polyhedron>(
-  //     raylib::Mesh::Cube(2.0f, 2.0f, 2.0f),
-  //     150.f,
-  //     raylib::Color::Yellow(),
-  //     steel,
-  //     raylib::Vector3{5.0f, 1.0f, -9.0f}
-  // );
-  //
-  // game_objects.push_back(cube3);
-  //
-  // std::shared_ptr<Body> cube4 = std::make_shared<Polyhedron>(
-  //     raylib::Mesh::Cube(2.0f, 2.0f, 2.0f),
-  //     100.f,
-  //     raylib::Color::Black(),
-  //     steel,
-  //     raylib::Vector3{0.0f, 1.0f, 8.0f}
-  // );
-  //
-  // game_objects.push_back(cube4);
-  //
-  // std::shared_ptr<Joint> joint = std::make_shared<SpringJoint>(
-  //     std::static_pointer_cast<Body>(cube1),
-  //     std::static_pointer_cast<Body>(cube2),
-  //     raylib::Color::Green(),
-  //     1000.f,
-  //     8.f,
-  //     0.4f
-  // );
-  //
-  // joint->anchor_a(raylib::Vector3{-1.0f, .0f, 1.0f})
-  //     .anchor_b(raylib::Vector3{1.0f, .0f, 1.0f});
-  //
-  // std::shared_ptr<Joint> joint2 = std::make_shared<SpringJoint>(
-  //     std::static_pointer_cast<Body>(cube1),
-  //     std::static_pointer_cast<Body>(cube3),
-  //     raylib::Color::Green(),
-  //     1000.f,
-  //     8.f,
-  //     0.4f
-  // );
-  //
-  // joint2->anchor_a(raylib::Vector3{1.0f, .0f, -1.0f})
-  //     .anchor_b(raylib::Vector3{1.0f, .0f, 1.0f});
-  //
-  // std::shared_ptr<Joint> joint3 = std::make_shared<SpringJoint>(
-  //     std::static_pointer_cast<Body>(cube1),
-  //     std::static_pointer_cast<Body>(cube4),
-  //     raylib::Color::Green(),
-  //     1000.f,
-  //     8.f,
-  //     0.4f
-  // );
-  //
-  // joint3->anchor_a(raylib::Vector3{1.0f, .0f, 1.0f})
-  //     .anchor_b(raylib::Vector3{-1.0f, .0f, -1.0f});
-  //
-  // game_objects.push_back(joint);
-  // game_objects.push_back(joint2);
-  // game_objects.push_back(joint3);
+  // cube->apply_force({0.0f, 0.0f, 100.f}, raylib::Vector3{0.00001f, 3.0f,
+  // 0.0f});
 
+  std::shared_ptr<Body> cube1 = std::make_shared<Cuboid>(
+      raylib::Vector3{2.0f, 2.0f, 2.0f},
+      raylib::Color::Red(),
+      rubber,
+      raylib::Vector3{5.0f, 1.0f, 0.0f}
+  );
+
+  cube1->mass(1000.f);
+
+  game_objects.push_back(cube1);
+
+  std::shared_ptr<Body> cube2 = std::make_shared<Cuboid>(
+      raylib::Vector3{2.0f, 2.f, 6.0f},
+      raylib::Color::Blue(),
+      lubricated,
+      raylib::Vector3{-5.0f, 1.0f, 0.0f}
+  );
+
+  cube2->mass(1000.f);
+
+  game_objects.push_back(cube2);
+
+  std::shared_ptr<Body> cube3 = std::make_shared<Polyhedron>(
+      raylib::Mesh::Cube(2.0f, 2.0f, 2.0f),
+      3000.f,
+      raylib::Color::Yellow(),
+      steel,
+      raylib::Vector3{5.0f, 1.0f, -9.0f}
+  );
+
+  game_objects.push_back(cube3);
+
+  std::shared_ptr<Body> cube4 = std::make_shared<Polyhedron>(
+      raylib::Mesh::Cube(2.0f, 2.0f, 2.0f),
+      3000.f,
+      raylib::Color::Gray(),
+      steel,
+      raylib::Vector3{0.0f, 1.0f, 8.0f}
+  );
+
+  game_objects.push_back(cube4);
+
+  std::shared_ptr<Joint> joint = std::make_shared<SpringJoint>(
+      std::static_pointer_cast<Body>(cube1),
+      std::static_pointer_cast<Body>(cube2),
+      raylib::Color::Green(),
+      1000.f,
+      8.f,
+      0.4f
+  );
+
+  joint->anchor_a(raylib::Vector3{-1.0f, .0f, 1.0f})
+      .anchor_b(raylib::Vector3{1.0f, .0f, 1.0f});
+
+  std::shared_ptr<Joint> joint2 = std::make_shared<SpringJoint>(
+      std::static_pointer_cast<Body>(cube1),
+      std::static_pointer_cast<Body>(cube3),
+      raylib::Color::Green(),
+      1000.f,
+      8.f,
+      0.4f
+  );
+
+  joint2->anchor_a(raylib::Vector3{1.0f, .0f, -1.0f})
+      .anchor_b(raylib::Vector3{1.0f, .0f, 1.0f});
+
+  std::shared_ptr<Joint> joint3 = std::make_shared<SpringJoint>(
+      std::static_pointer_cast<Body>(cube1),
+      std::static_pointer_cast<Body>(cube4),
+      raylib::Color::Green(),
+      1000.f,
+      8.f,
+      0.4f
+  );
+
+  joint3->anchor_a(raylib::Vector3{1.0f, .0f, 1.0f})
+      .anchor_b(raylib::Vector3{-1.0f, .0f, -1.0f});
+
+  game_objects.push_back(joint);
+  game_objects.push_back(joint2);
+  game_objects.push_back(joint3);
+
+  // Collisions test
   // std::shared_ptr<Polyhedron> polyhedron1 = std::make_shared<Polyhedron>(
   //     raylib::Mesh::Cube(2.0f, 2.0f, 2.0f),
   //     1000.f,
@@ -174,13 +178,13 @@ int main() {
   //
   // game_objects.push_back(polyhedron2);
   //
-  // for (auto &object : game_objects) {
-  //   object->initialize();
-  // }
+  for (auto &object : game_objects) {
+    object->initialize();
+  }
   //--------------------------------------------------------------------------------------
 
   // Physics step time in seconds
-  constexpr float STEP_TIME = 1.e-3f;
+  constexpr float STEP_TIME = 1.e-2f;
   double physics_time = 0.0f;
 
   // Main game loop
@@ -229,30 +233,30 @@ int main() {
       });
     }
 
-    // const auto move_force = 10000.f;
-    //
-    // if (IsKeyDown(KEY_SPACE)) {
-    //   cube1->apply_force(-GRAVITY * 1500.f);
-    // }
-    //
-    // if (IsKeyDown(KEY_W)) {
-    //   cube1->apply_force(raylib::Vector3{0.0f, 0.0f, -move_force});
-    // }
-    //
-    // if (IsKeyDown(KEY_S)) {
-    //   cube1->apply_force(raylib::Vector3{0.0f, 0.0f, move_force});
-    // }
-    //
-    // if (IsKeyDown(KEY_A)) {
-    //   cube1->apply_force(raylib::Vector3{-move_force, 0.0f, 0.0f});
-    // }
-    //
-    // if (IsKeyDown(KEY_D)) {
-    //   cube1->apply_force(raylib::Vector3{move_force, 0.0f, 0.0f});
-    // }
-    //
-    // camera.target = (cube1->position() + cube2->position()) / 2.f;
-    camera.target = cube->position();
+    const auto move_force = 10000.f;
+
+    if (IsKeyDown(KEY_SPACE)) {
+      cube1->apply_force(-GRAVITY * 1500.f);
+    }
+
+    if (IsKeyDown(KEY_W)) {
+      cube1->apply_force(raylib::Vector3{0.0f, 0.0f, -move_force});
+    }
+
+    if (IsKeyDown(KEY_S)) {
+      cube1->apply_force(raylib::Vector3{0.0f, 0.0f, move_force});
+    }
+
+    if (IsKeyDown(KEY_A)) {
+      cube1->apply_force(raylib::Vector3{-move_force, 0.0f, 0.0f});
+    }
+
+    if (IsKeyDown(KEY_D)) {
+      cube1->apply_force(raylib::Vector3{move_force, 0.0f, 0.0f});
+    }
+
+    camera.target = (cube1->position() + cube2->position()) / 2.f;
+    // camera.target = cube->position();
     camera.Update(CAMERA_THIRD_PERSON);
     //----------------------------------------------------------------------------------
 
