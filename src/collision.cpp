@@ -2,16 +2,19 @@
 #include <print>
 
 std::optional<SupportPoint> find_support_point(
-    raylib::Vector3 normal, raylib::Vector3 point, Polyhedron::Vertices vertices
+    raylib::Vector3 normal,
+    raylib::Vector3 point,
+    std::shared_ptr<Polyhedron> body
 ) {
-  float deepest_pen = 0.f;
+  float max_depth = 0.f;
   std::optional<SupportPoint> deepest_point;
 
-  for (const auto &vertex : vertices) {
-    const auto pen = -normal.DotProduct(vertex - point);
-    if (pen > deepest_pen) {
-      deepest_pen = pen;
-      deepest_point = SupportPoint{vertex, pen};
+  for (const auto &vertex : body->vertices()) {
+    const auto world_vertex = body->position() + body->transform_point(vertex);
+    const auto depth = -normal.DotProduct(world_vertex - point);
+    if (depth > max_depth) {
+      max_depth = depth;
+      deepest_point = SupportPoint{vertex, depth};
     }
   }
 
@@ -26,24 +29,31 @@ std::optional<CollisionManifold> find_collision_manifold(
   float minimum_depth = std::numeric_limits<float>::max();
 
   for (const auto &[a, _b, _c, normal] : body_a->faces()) {
-    const auto point = find_support_point(normal, a, body_b->vertices());
+    const auto world_a = body_a->position() + body_a->transform_point(a);
+    const auto world_normal = body_a->transform_point(normal);
+
+    const auto point = find_support_point(world_normal, world_a, body_b);
 
     if (!point)
       return std::nullopt;
 
-    std::println(
-        "for: {}, {}: point: {}, depth: {} | minimum depth: {}",
-        a,
-        normal,
-        point->vertex,
-        point->depth,
-        minimum_depth
-    );
-
     const auto depth = point->depth;
+    // const auto vertex = point->vertex;
+
+    // std::println(
+    //     "for: {} ({}), {} ({}): point: {}, depth: {} | minimum: {}",
+    //     a,
+    //     world_a,
+    //     normal,
+    //     world_normal,
+    //     vertex,
+    //     depth,
+    //     minimum_depth
+    // );
+
     if (depth < minimum_depth) {
       minimum_depth = depth;
-      manifold = CollisionManifold{normal, point->vertex, depth};
+      manifold = CollisionManifold{world_normal, point->vertex, depth};
     }
   }
 

@@ -44,7 +44,7 @@ Polyhedron::Polyhedron(
     // Compute area-magnitude normal
     const raylib::Vector3 n = (b - a).CrossProduct(c - a);
 
-    _faces.emplace_back(a, b, c, n);
+    _faces.emplace_back(a, b, c, n.Normalize());
   }
 
   // Compute inertia tensor
