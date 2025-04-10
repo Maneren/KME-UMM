@@ -154,6 +154,7 @@ protected:
     if (offset.Length() <= EPSILON)
       return;
 
+    // τ = r × F
     const auto torque =
         transform_point(offset).CrossProduct(transform_point(force));
 
@@ -240,8 +241,11 @@ private:
       return;
 
     // dq = ½ ⋅ ω * q
-    omega *= 0.5f;
-    const raylib::Quaternion delta_q(omega.x, omega.y, omega.z, 1.f);
+    // omega *= 0.5f;
+    // const raylib::Quaternion delta_q(omega.x, omega.y, omega.z, 1.f);
+
+    const auto delta_q =
+        raylib::Quaternion::FromAxisAngle(omega, omega.Length() * delta);
 
     // q' = q * dq
     const auto rotated = (_orientation * delta_q).Normalize();
