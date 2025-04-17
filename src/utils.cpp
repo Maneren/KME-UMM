@@ -70,3 +70,20 @@ raylib::Matrix reorthonormalize(const raylib::Matrix &m) {
       1.f
   };
 }
+
+raylib::Quaternion angular_velocity_to_rotation(
+    const raylib::Vector3 &angular_velocity, const float delta
+) {
+  // adapted from raymath, omits duplicate calculations
+  const auto velocity_magnitude = angular_velocity.Length();
+  const auto angle = velocity_magnitude * delta;
+  const auto axis = angular_velocity.Scale(1.f / velocity_magnitude);
+
+  float sinres = sinf(angle);
+  float cosres = cosf(angle);
+
+  return raylib::Quaternion{
+      axis.x * sinres, axis.y * sinres, axis.z * sinres, cosres
+  }
+      .Normalize();
+}

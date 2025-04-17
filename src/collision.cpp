@@ -14,7 +14,7 @@ std::optional<SupportPoint> find_support_point(
     const auto depth = -normal.DotProduct(world_vertex - point);
     if (depth > max_depth) {
       max_depth = depth;
-      deepest_point = SupportPoint{vertex, depth};
+      deepest_point = SupportPoint{world_vertex, depth};
     }
   }
 
@@ -38,18 +38,6 @@ std::optional<CollisionManifold> find_collision_manifold(
       return std::nullopt;
 
     const auto depth = point->depth;
-    // const auto vertex = point->vertex;
-
-    // std::println(
-    //     "for: {} ({}), {} ({}): point: {}, depth: {} | minimum: {}",
-    //     a,
-    //     world_a,
-    //     normal,
-    //     world_normal,
-    //     vertex,
-    //     depth,
-    //     minimum_depth
-    // );
 
     if (depth < minimum_depth) {
       minimum_depth = depth;
@@ -60,7 +48,7 @@ std::optional<CollisionManifold> find_collision_manifold(
   return manifold;
 }
 
-std::optional<CollisionManifold> detect_polyhedron_collision(
+std::optional<Contact> detect_polyhedron_collision(
     std::shared_ptr<Polyhedron> body_a, std::shared_ptr<Polyhedron> body_b
 ) {
   const auto manifold_a = find_collision_manifold(body_a, body_b);
@@ -71,15 +59,92 @@ std::optional<CollisionManifold> detect_polyhedron_collision(
   if (!manifold_b)
     return std::nullopt;
 
-  std::println(
-      "manifold_a: {}, manifold_b: {}", manifold_a.value(), manifold_b.value()
-  );
-
   if (manifold_a->depth < manifold_b->depth) {
-    return manifold_a;
+    return Contact{
+        body_a,
+        body_b,
+        Contact::FaceVertex{manifold_a->penetration_point, manifold_a->normal},
+        manifold_a->depth
+    };
   } else {
-    return CollisionManifold{
-        -manifold_b->normal, manifold_b->penetration_point, manifold_b->depth
+    return Contact{
+        body_b,
+        body_a,
+        Contact::FaceVertex{
+            manifold_b->penetration_point, manifold_b->normal
+
+        },
+        manifold_b->depth
     };
   }
+}
+
+void Contact::resolve() const {
+  if (!is_face_vertex())
+    throw std::runtime_error("not a face vertex collision");
+
+  const auto data = face_vertex();
+
+  const auto point_a = data.point - body_a->position();
+  const auto point_b = data.point - body_b->position();
+
+  const auto point_a_velocity = body_a->point_velocity(point_a);
+  const auto point_b_velocity = body_b->point_velocity(point_b);
+
+  const auto &normal = data.normal;
+
+  // vᵣ = (𝐯₂ - 𝐯₁) ⋅ 𝐧
+  const auto relative_velocity =
+      (point_b_velocity - point_a_velocity).DotProduct(normal);
+
+  std::println("relative_velocity: {}, depth: {}", relative_velocity, depth);
+
+  if (relative_velocity >= -EPSILON) {
+    // not colliding
+    return;
+  }
+
+  const auto numerator =
+      -(1.f + COEFFICIENT_OF_RESTITUTION) * relative_velocity;
+
+  const auto inverse_masses = body_a->inverse_mass() + body_b->inverse_mass();
+
+  const auto inverse_inertia_tensor_a = body_a->inverse_inertia_tensor();
+  const auto inverse_inertia_tensor_b = body_b->inverse_inertia_tensor();
+
+  // 𝐨 = 𝐫 × 𝐧
+  const auto axis_a = point_a.CrossProduct(normal);
+  const auto axis_b = point_b.CrossProduct(normal);
+
+  // 𝐈⁻¹𝐨 × 𝐫
+  const auto angular_a =
+      axis_a.Transform(inverse_inertia_tensor_a).CrossProduct(point_a);
+  const auto angular_b =
+      axis_b.Transform(inverse_inertia_tensor_b).CrossProduct(point_b);
+
+  const auto denominator =
+      inverse_masses + (angular_a + angular_b).DotProduct(normal);
+
+  std::println("numerator: {}", numerator);
+  std::println(
+      "denominator: {} ({} + {} + {})",
+      denominator,
+      inverse_masses,
+      angular_a,
+      angular_b
+  );
+  const auto impulse_magnitude = numerator / denominator;
+
+  std::println("impulse: {}", impulse_magnitude);
+
+  // 𝐣 = j𝐧
+  const auto impulse = normal * impulse_magnitude;
+
+  // 𝐏' = 𝐏 - 𝐣
+  body_a->linear_momentum() -= impulse;
+  body_b->linear_momentum() += impulse;
+
+  // 𝐋' = 𝐋 - j𝐨
+  body_a->angular_momentum() -= axis_a * impulse_magnitude;
+  body_b->angular_momentum() += axis_b * impulse_magnitude;
 }

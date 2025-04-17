@@ -214,18 +214,12 @@ int main() {
         }
       }
 
-      // const auto collision =
-      //     detect_polyhedron_collision(polyhedron1, polyhedron2);
-      //
-      // if (collision.has_value()) {
-      //   const auto &value = collision.value();
-      //   std::println(
-      //       "collision: normal: {}, point: {}, depth: {}",
-      //       value.normal,
-      //       value.penetration_point,
-      //       value.depth
-      //   );
-      // }
+      const auto collision = detect_polyhedron_collision(cube1, cube2);
+
+      if (collision.has_value()) {
+        const auto &value = collision.value();
+        value.resolve();
+      }
 
       // Remove dead objects
       std::erase_if(game_objects, [](const auto &object) {
