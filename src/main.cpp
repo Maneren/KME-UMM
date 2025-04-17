@@ -162,11 +162,11 @@ int main() {
   game_objects.push_back(cube1);
 
   std::shared_ptr<Polyhedron> cube2 = std::make_shared<Polyhedron>(
-      raylib::Mesh::Cube(2.0f, 2.0f, 2.0f),
+      raylib::Mesh::Cube(2.0f, 2.0f, 4.0f),
       1000.f,
       raylib::Color::Blue(),
       steel,
-      raylib::Vector3{4.0f, 1.0f, 0.0f},
+      raylib::Vector3{6.0f, 1.0f, 0.0f},
       raylib::Quaternion::FromAxisAngle(
           raylib::Vector3{0.0f, 1.0f, 0.0f}, PI / 6
       ) *
@@ -186,7 +186,7 @@ int main() {
   constexpr float STEP_TIME = 1.e-3f;
   double physics_time = 0.0f;
 
-  cube1->apply_force(raylib::Vector3{1000000.0f, 0.0f, 0.0f});
+  cube1->apply_force(raylib::Vector3{8000.0f / STEP_TIME, 0.0f, 0.0f});
 
   // Main game loop
   while (!window.ShouldClose()) // Detect window close button or ESC key
@@ -196,11 +196,11 @@ int main() {
     const auto simulation_time = window.GetTime();
 
     while (physics_time < simulation_time) {
-      std::println(
-          "\n\nStepping physics... {} -> {}",
-          physics_time,
-          physics_time + STEP_TIME
-      );
+      // std::println(
+      //     "\n\nStepping physics... {} -> {}",
+      //     physics_time,
+      //     physics_time + STEP_TIME
+      // );
       physics_time += static_cast<double>(STEP_TIME);
 
       // Apply gravity

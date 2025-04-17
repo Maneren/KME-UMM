@@ -97,12 +97,12 @@ void Contact::resolve() const {
   const auto relative_velocity =
       (point_b_velocity - point_a_velocity).DotProduct(normal);
 
-  std::println("relative_velocity: {}, depth: {}", relative_velocity, depth);
-
   if (relative_velocity >= -EPSILON) {
     // not colliding
     return;
   }
+
+  std::println("relative_velocity: {}, depth: {}", relative_velocity, depth);
 
   const auto numerator =
       -(1.f + COEFFICIENT_OF_RESTITUTION) * relative_velocity;

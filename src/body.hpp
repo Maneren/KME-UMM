@@ -249,14 +249,14 @@ protected:
     //     _angular_momentum.Length()
     // );
 
-    // Eₖ = |𝐏|² / 2m (equivalent to Eₖ = ½ m |𝐯|², where 𝐯 = 𝐏 / m)
-    const auto linear_energy =
-        _linear_momentum.LengthSqr() * 0.5f * _inverse_mass;
-
-    // Eₘ = ½ 𝐋 ⋅ 𝛚 (equivalent to Eₘ = ½ 𝐈𝛚², since 𝛚 = 𝐈⁻¹𝐋)
-    const auto angular_energy =
-        _angular_velocity.DotProduct(_angular_momentum) * 0.5f;
-
+    // // Eₖ = |𝐏|² / 2m (equivalent to Eₖ = ½ m |𝐯|², where 𝐯 = 𝐏 / m)
+    // const auto linear_energy =
+    //     _linear_momentum.LengthSqr() * 0.5f * _inverse_mass;
+    //
+    // // Eₘ = ½ 𝐋 ⋅ 𝛚 (equivalent to Eₘ = ½ 𝐈𝛚², since 𝛚 = 𝐈⁻¹𝐋)
+    // const auto angular_energy =
+    //     _angular_velocity.DotProduct(_angular_momentum) * 0.5f;
+    //
     //   std::println(
     //       "linear_energy: {} J + angular_energy: {} J = {} J",
     //       linear_energy,
