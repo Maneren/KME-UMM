@@ -166,7 +166,7 @@ int main() {
       1000.f,
       raylib::Color::Blue(),
       steel,
-      raylib::Vector3{5.0f, 1.0f, 0.0f},
+      raylib::Vector3{4.0f, 1.0f, 0.0f},
       raylib::Quaternion::FromAxisAngle(
           raylib::Vector3{0.0f, 1.0f, 0.0f}, PI / 6
       ) *
@@ -183,8 +183,10 @@ int main() {
   //--------------------------------------------------------------------------------------
 
   // Physics step time in seconds
-  constexpr float STEP_TIME = 1.e-2f;
+  constexpr float STEP_TIME = 1.e-3f;
   double physics_time = 0.0f;
+
+  cube1->apply_force(raylib::Vector3{1000000.0f, 0.0f, 0.0f});
 
   // Main game loop
   while (!window.ShouldClose()) // Detect window close button or ESC key
@@ -226,7 +228,7 @@ int main() {
       });
     }
 
-    const auto move_force = 1.f / STEP_TIME;
+    const auto move_force = 0.2f / STEP_TIME * cube1->mass();
 
     if (IsKeyDown(KEY_SPACE)) {
       cube1->apply_force(raylib::Vector3{0.0f, move_force, 0.0f});
@@ -250,6 +252,7 @@ int main() {
 
     camera.target = (cube1->position() + cube2->position()) / 2.f;
     // camera.target = cube->position();
+    // camera.target = cube1->position();
     camera.Update(CAMERA_THIRD_PERSON);
     //----------------------------------------------------------------------------------
 
