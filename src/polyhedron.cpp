@@ -52,7 +52,7 @@ Polyhedron::Polyhedron(
   // Creates a tetrahedron for each triangle face in the mesh, computes its
   // properties and sums them up.
 
-  _mass = 0.f;
+  auto mass = 0.f;
   auto center_of_mass = raylib::Vector3::Zero();
 
   // Note that thorought the computations, it is assumed that the last
@@ -74,7 +74,7 @@ Polyhedron::Polyhedron(
     // Cₜ = (a + b + c + d) / 4, where d = (0, 0, 0)
     const raylib::Vector3 tetra_center_of_mass = (a + b + c) / 4.f;
 
-    _mass += tetra_mass;
+    mass += tetra_mass;
 
     // weighted sum
     center_of_mass += tetra_center_of_mass * tetra_mass;
@@ -101,7 +101,7 @@ Polyhedron::Polyhedron(
   }
 
   // Divide the weighted sum to get average
-  center_of_mass /= _mass;
+  center_of_mass /= mass;
 
   // Scale tensor by factored constants
   I *= _density / 60.f;
@@ -113,14 +113,14 @@ Polyhedron::Polyhedron(
       square(center_of_mass.x) + square(center_of_mass.z),
       square(center_of_mass.x) + square(center_of_mass.y)
   };
-  I -= com_distance * _mass;
+  I -= com_distance * mass;
 
   const raylib::Vector3 com_distance_prime{
       center_of_mass.y * center_of_mass.z,
       center_of_mass.x * center_of_mass.y,
       center_of_mass.x * center_of_mass.z
   };
-  Iprime -= com_distance_prime * _mass;
+  Iprime -= com_distance_prime * mass;
 
   // Arrange the vector components into a matrix tensor
   const auto inertia_tensor = raylib::Matrix{
@@ -142,11 +142,17 @@ Polyhedron::Polyhedron(
       1.f
   };
 
-  _inverse_inertia_tensor = inertia_tensor.Invert();
+  _inverse_body_inertia_tensor = inertia_tensor.Invert();
+  _inverse_mass = 1.f / mass;
 
-  std::println("mass: {}, center of mass: {}", _mass, center_of_mass);
+  std::println(
+      "mass: {}, center of mass: {}, inverse mass: {}",
+      mass,
+      center_of_mass,
+      _inverse_mass
+  );
   std::println("inertia tensor: {}", inertia_tensor);
-  std::println("inverse inertia tensor: {}", _inverse_inertia_tensor);
+  std::println("inverse inertia tensor: {}", _inverse_body_inertia_tensor);
 
   if (center_of_mass.Length() >= EPSILON) {
     // Move mesh origin to the center of mass

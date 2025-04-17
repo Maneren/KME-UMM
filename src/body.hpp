@@ -38,11 +38,6 @@ public:
     update_velocity();
     return *this;
   }
-  Body &mass(const float mass) {
-    this->_mass = mass;
-    this->_inverse_mass = 1.f / mass;
-    return *this;
-  }
   Body &orientation(const raylib::Quaternion &orientation) {
     this->_orientation = orientation;
     const auto R = _orientation.ToMatrix();
@@ -108,7 +103,7 @@ public:
     _angular_momentum = state.angular_momentum;
   }
 
-  float mass() const { return _mass; }
+  float mass() const { return 1.f / _inverse_mass; }
   float inverse_mass() const { return _inverse_mass; }
 
   const raylib::Matrix &inverse_inertia_tensor() const {
@@ -126,7 +121,7 @@ public:
   const raylib::Vector3 &torque() const { return _net_torque; }
 
   const raylib::Vector3 point_velocity(const raylib::Vector3 &point) const {
-    return _velocity + _angular_velocity.CrossProduct(point - _position);
+    return _velocity + _angular_velocity.CrossProduct(point);
   }
 
   const raylib::Texture &texture() const { return _texture; }
@@ -139,6 +134,10 @@ public:
     _model.Load(_mesh);
     _model.transform = _orientation.ToMatrix();
     _model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = _texture;
+
+    update_velocity();
+    update_angular_velocity();
+    update_inverse_inertia_tensor();
   }
 
   virtual void draw() const override {
@@ -162,8 +161,6 @@ protected:
   raylib::Vector3 _position;
   raylib::Vector3 _linear_momentum = raylib::Vector3::Zero();
   raylib::Vector3 _net_force = raylib::Vector3::Zero();
-
-  float _mass = 1.0f;
 
   raylib::Quaternion _orientation;
   raylib::Vector3 _angular_momentum = raylib::Vector3::Zero();
@@ -192,7 +189,7 @@ protected:
     _angular_velocity = _angular_momentum.Transform(_inverse_inertia_tensor);
   }
   void update_inverse_inertia_tensor() {
-    const raylib::Matrix R = _model.transform;
+    const raylib::Matrix &R = _model.transform;
     // 𝐈⁻¹ = 𝐑 𝐈⁻¹₀ 𝐑ᵀ
     _inverse_inertia_tensor = R * inverse_body_inertia_tensor() * R.Transpose();
   }
@@ -200,7 +197,7 @@ protected:
   void body_apply_force(
       const raylib::Vector3 &force, const raylib::Vector3 &offset
   ) {
-    std::println("Applied force: {} at offset: {}", force, offset);
+    // std::println("Applied force: {} at offset: {}", force, offset);
 
     // ignore very small forces
     if (force.Length() <= EPSILON)
@@ -216,10 +213,10 @@ protected:
     const auto torque =
         transform_point(offset).CrossProduct(transform_point(force));
 
-    std::println("Resulting in torque: {}", torque);
+    // std::println("Resulting in torque: {}", torque);
 
     _net_torque += torque;
-    std::println();
+    // std::println();
   };
 
   static State state_change(const float delta, const State &state) {
@@ -246,11 +243,11 @@ protected:
     update_position(delta);
     update_orientation(delta);
 
-    std::println(
-        "linear_momentum: {} kg m s⁻¹, angular_momentum: {} kg m² s⁻¹",
-        _linear_momentum.Length(),
-        _angular_momentum.Length()
-    );
+    // std::println(
+    //     "linear_momentum: {} kg m s⁻¹, angular_momentum: {} kg m² s⁻¹",
+    //     _linear_momentum.Length(),
+    //     _angular_momentum.Length()
+    // );
 
     // Eₖ = |𝐏|² / 2m (equivalent to Eₖ = ½ m |𝐯|², where 𝐯 = 𝐏 / m)
     const auto linear_energy =
@@ -260,13 +257,13 @@ protected:
     const auto angular_energy =
         _angular_velocity.DotProduct(_angular_momentum) * 0.5f;
 
-    std::println(
-        "linear_energy: {} J + angular_energy: {} J = {}",
-        linear_energy,
-        angular_energy,
-        linear_energy + angular_energy
-    );
-    std::println();
+    //   std::println(
+    //       "linear_energy: {} J + angular_energy: {} J = {} J",
+    //       linear_energy,
+    //       angular_energy,
+    //       linear_energy + angular_energy
+    //   );
+    //   std::println();
   };
 
 private:
@@ -318,9 +315,7 @@ private:
     if (_angular_velocity.Length() <= EPSILON)
       return;
 
-    const auto delta_q = raylib::Quaternion::FromAxisAngle(
-        _angular_velocity, _angular_velocity.Length() * delta
-    );
+    const auto delta_q = angular_velocity_to_rotation(_angular_velocity, delta);
 
     // q' = q * dq
     const auto rotated = (_orientation * delta_q).Normalize();

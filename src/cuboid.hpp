@@ -24,12 +24,6 @@ public:
 
   void update(const float delta) override;
 
-  Body &mass(const float mass) {
-    this->_mass = mass;
-    update_inertia();
-    return *this;
-  }
-
 protected:
   const raylib::Matrix &inverse_body_inertia_tensor() const override {
     return _inverse_inertia_tensor;
@@ -52,6 +46,6 @@ private:
     const raylib::Vector3 base_tensor{
         (y * y + z * z), (x * x + z * z), (x * x + y * y)
     };
-    _inverse_inertia_tensor = diagonal_matrix(base_tensor * _mass / 12.f);
+    _inverse_inertia_tensor = diagonal_matrix(base_tensor * mass() / 12.f);
   }
 };
