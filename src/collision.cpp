@@ -83,7 +83,7 @@ void Contact::resolve() const {
   if (!is_face_vertex())
     throw std::runtime_error("not a face vertex collision");
 
-  const auto data = face_vertex();
+  const auto &data = face_vertex();
 
   const auto point_a = data.point - body_a->position();
   const auto point_b = data.point - body_b->position();
@@ -109,8 +109,8 @@ void Contact::resolve() const {
 
   const auto inverse_masses = body_a->inverse_mass() + body_b->inverse_mass();
 
-  const auto inverse_inertia_tensor_a = body_a->inverse_inertia_tensor();
-  const auto inverse_inertia_tensor_b = body_b->inverse_inertia_tensor();
+  const auto &inverse_inertia_tensor_a = body_a->inverse_inertia_tensor();
+  const auto &inverse_inertia_tensor_b = body_b->inverse_inertia_tensor();
 
   // 𝐨 = 𝐫 × 𝐧
   const auto axis_a = point_a.CrossProduct(normal);
