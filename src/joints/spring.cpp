@@ -2,7 +2,7 @@
 #include <Vector3.hpp>
 #include <print>
 
-void SpringJoint::update(const float delta) {
+void SpringJoint::update(const float) {
   const auto offset_a = _body_a->transform_point(_anchor_a);
   const auto offset_b = _body_b->transform_point(_anchor_b);
 
@@ -49,7 +49,7 @@ void SpringJoint::update(const float delta) {
 
   std::println("force_magnitude: {}", force_magnitude);
 
-  // ignore very small forces
+  // ignore small forces
   if (std::abs(force_magnitude) <= EPSILON)
     return;
 

@@ -1,3 +1,4 @@
+#include "body.hpp"
 #include "collision.hpp"
 #include "consts.hpp"
 #include "cuboid.hpp"
@@ -70,110 +71,110 @@ int main() {
   // 0.0f});
 
   // 4-body test
-  // std::shared_ptr<Body> cube1 = std::make_shared<Polyhedron>(
-  //     raylib::Mesh::Cube(2.0f, 2.0f, 2.0f),
-  //     3000.f,
-  //     raylib::Color::Red(),
-  //     rubber,
-  //     raylib::Vector3{5.0f, 1.0f, 0.0f}
-  // );
-  //
-  // game_objects.push_back(cube1);
-  //
-  // std::shared_ptr<Body> cube2 = std::make_shared<Polyhedron>(
-  //     raylib::Mesh::Cube(2.0f, 2.f, 6.0f),
-  //     3000.f,
-  //     raylib::Color::Blue(),
-  //     lubricated,
-  //     raylib::Vector3{-5.0f, 1.0f, 0.0f}
-  // );
-  //
-  // game_objects.push_back(cube2);
-  //
-  // std::shared_ptr<Body> cube3 = std::make_shared<Polyhedron>(
-  //     raylib::Mesh::Cube(2.0f, 2.0f, 2.0f),
-  //     3000.f,
-  //     raylib::Color::Yellow(),
-  //     steel,
-  //     raylib::Vector3{5.0f, 1.0f, -9.0f}
-  // );
-  //
-  // game_objects.push_back(cube3);
-  //
-  // std::shared_ptr<Body> cube4 = std::make_shared<Polyhedron>(
-  //     raylib::Mesh::Cube(2.0f, 2.0f, 2.0f),
-  //     3000.f,
-  //     raylib::Color::Gray(),
-  //     steel,
-  //     raylib::Vector3{0.0f, 1.0f, 8.0f}
-  // );
-  //
-  // game_objects.push_back(cube4);
-  //
-  // std::shared_ptr<Joint> joint = std::make_shared<SpringJoint>(
-  //     std::static_pointer_cast<Body>(cube1),
-  //     std::static_pointer_cast<Body>(cube2),
-  //     raylib::Color::Green(),
-  //     1000.f,
-  //     8.f,
-  //     0.4f
-  // );
-  //
-  // joint->anchor_a(raylib::Vector3{-1.0f, .0f, 1.0f})
-  //     .anchor_b(raylib::Vector3{1.0f, .0f, 1.0f});
-  //
-  // std::shared_ptr<Joint> joint2 = std::make_shared<SpringJoint>(
-  //     std::static_pointer_cast<Body>(cube1),
-  //     std::static_pointer_cast<Body>(cube3),
-  //     raylib::Color::Green(),
-  //     1000.f,
-  //     8.f,
-  //     0.4f
-  // );
-  //
-  // joint2->anchor_a(raylib::Vector3{1.0f, .0f, -1.0f})
-  //     .anchor_b(raylib::Vector3{1.0f, .0f, 1.0f});
-  //
-  // std::shared_ptr<Joint> joint3 = std::make_shared<SpringJoint>(
-  //     std::static_pointer_cast<Body>(cube1),
-  //     std::static_pointer_cast<Body>(cube4),
-  //     raylib::Color::Green(),
-  //     1000.f,
-  //     8.f,
-  //     0.4f
-  // );
-  //
-  // joint3->anchor_a(raylib::Vector3{1.0f, .0f, 1.0f})
-  //     .anchor_b(raylib::Vector3{-1.0f, .0f, -1.0f});
-  //
-  // game_objects.push_back(joint);
-  // game_objects.push_back(joint2);
-  // game_objects.push_back(joint3);
-
-  // Collisions test
-  std::shared_ptr<Polyhedron> cube1 = std::make_shared<Polyhedron>(
+  auto cube1 = std::make_shared<Polyhedron>(
       raylib::Mesh::Cube(2.0f, 2.0f, 2.0f),
-      1000.f,
+      3000.f,
       raylib::Color::Red(),
-      steel,
-      raylib::Vector3{0.0f, 1.0f, 0.0f}
+      rubber,
+      raylib::Vector3{5.0f, 1.0f, 0.0f}
   );
 
   game_objects.push_back(cube1);
 
-  std::shared_ptr<Polyhedron> cube2 = std::make_shared<Polyhedron>(
-      raylib::Mesh::Cube(2.0f, 2.0f, 4.0f),
-      1000.f,
+  auto cube2 = std::make_shared<Polyhedron>(
+      raylib::Mesh::Cube(2.0f, 2.f, 6.0f),
+      3000.f,
       raylib::Color::Blue(),
-      steel,
-      raylib::Vector3{6.0f, 1.0f, 0.0f},
-      raylib::Quaternion::FromAxisAngle(
-          raylib::Vector3{0.0f, 1.0f, 0.0f}, PI / 6
-      ) *
-          raylib::Quaternion::FromAxisAngle(
-              raylib::Vector3{0.0f, 0.0f, 1.0f}, PI / 6
-          )
+      lubricated,
+      raylib::Vector3{-5.0f, 1.0f, 0.0f}
   );
+
+  game_objects.push_back(cube2);
+
+  auto cube3 = std::make_shared<Polyhedron>(
+      raylib::Mesh::Cube(2.0f, 2.0f, 2.0f),
+      3000.f,
+      raylib::Color::Yellow(),
+      steel,
+      raylib::Vector3{5.0f, 1.0f, -9.0f}
+  );
+
+  game_objects.push_back(cube3);
+
+  auto cube4 = std::make_shared<Polyhedron>(
+      raylib::Mesh::Cube(2.0f, 2.0f, 2.0f),
+      3000.f,
+      raylib::Color::Gray(),
+      steel,
+      raylib::Vector3{0.0f, 1.0f, 8.0f}
+  );
+
+  game_objects.push_back(cube4);
+
+  std::shared_ptr<Joint> joint = std::make_shared<SpringJoint>(
+      std::static_pointer_cast<Body>(cube1),
+      std::static_pointer_cast<Body>(cube2),
+      raylib::Color::Green(),
+      1000.f,
+      8.f,
+      2.0f
+  );
+
+  joint->anchor_a(raylib::Vector3{-1.0f, .0f, 1.0f})
+      .anchor_b(raylib::Vector3{1.0f, .0f, 1.0f});
+
+  auto joint2 = std::make_shared<SpringJoint>(
+      std::static_pointer_cast<Body>(cube1),
+      std::static_pointer_cast<Body>(cube3),
+      raylib::Color::Green(),
+      1000.f,
+      8.f,
+      2.0f
+  );
+
+  joint2->anchor_a(raylib::Vector3{1.0f, .0f, -1.0f})
+      .anchor_b(raylib::Vector3{1.0f, .0f, 1.0f});
+
+  auto joint3 = std::make_shared<SpringJoint>(
+      std::static_pointer_cast<Body>(cube1),
+      std::static_pointer_cast<Body>(cube4),
+      raylib::Color::Green(),
+      1000.f,
+      8.f,
+      2.0f
+  );
+
+  joint3->anchor_a(raylib::Vector3{1.0f, .0f, 1.0f})
+      .anchor_b(raylib::Vector3{-1.0f, .0f, -1.0f});
+
+  game_objects.push_back(joint);
+  game_objects.push_back(joint2);
+  game_objects.push_back(joint3);
+
+  // // Collisions test
+  // std::shared_ptr<Polyhedron> cube1 = std::make_shared<Polyhedron>(
+  //     raylib::Mesh::Cube(2.0f, 2.0f, 2.0f),
+  //     1000.f,
+  //     raylib::Color::Red(),
+  //     steel,
+  //     raylib::Vector3{0.0f, 1.0f, 0.0f}
+  // );
+  //
+  // game_objects.push_back(cube1);
+  //
+  // std::shared_ptr<Polyhedron> cube2 = std::make_shared<Polyhedron>(
+  //     raylib::Mesh::Cube(2.0f, 2.0f, 4.0f),
+  //     1000.f,
+  //     raylib::Color::Blue(),
+  //     steel,
+  //     raylib::Vector3{6.0f, 1.0f, 0.0f},
+  //     raylib::Quaternion::FromAxisAngle(
+  //         raylib::Vector3{0.0f, 1.0f, 0.0f}, PI / 6
+  //     ) *
+  //         raylib::Quaternion::FromAxisAngle(
+  //             raylib::Vector3{0.0f, 0.0f, 1.0f}, PI / 6
+  //         )
+  // );
 
   game_objects.push_back(cube2);
 
@@ -210,9 +211,18 @@ int main() {
 
       // Update all alive objects
       for (const auto &object : game_objects) {
-        if (object->alive) {
-          object->update(STEP_TIME);
-        }
+        if (!object->alive)
+          continue;
+
+        // if (const auto body = std::dynamic_pointer_cast<Body>(object); body)
+        // {
+        //   // body->apply_force(GRAVITY * body->mass());
+        //   const auto state = body->state();
+        //
+        //   ode<Body::State>(Body::State::update, state, STEP_TIME);
+        // }
+
+        object->update(STEP_TIME);
       }
 
       const auto collision = detect_polyhedron_collision(cube1, cube2);

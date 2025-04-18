@@ -7,7 +7,8 @@ template <typename Y> using ODE = std::function<Y(float, const Y &)>;
 enum ODE_Method { EULER, HEUNE, MODIFIED_EULER, RUNGE_KUTTA_4 };
 
 template <typename Y, const ODE_Method METHOD = ODE_Method::EULER>
-Y ode(ODE<Y> f, Y y, float h) {
+Y ode(const ODE<Y> &f, Y y, double t0, double t1, float h) {
+  const auto dt = t1 - t0;
   if constexpr (METHOD == ODE_Method::EULER) {
     return y + derivative(f, y, h) * h;
   } else if constexpr (METHOD == ODE_Method::HEUNE) {

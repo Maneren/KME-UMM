@@ -17,4 +17,4 @@ constexpr float DRAG_COEFFICIENT_CUBE = 2.1f;
 
 constexpr float ENVIRONMENT_FRICTION_COEFFICIENT = 0.2f;
 
-constexpr float COEFFICIENT_OF_RESTITUTION = 1.0f;
+constexpr float COEFFICIENT_OF_RESTITUTION = 0.8f;

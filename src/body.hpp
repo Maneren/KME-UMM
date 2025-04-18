@@ -56,52 +56,121 @@ public:
     return *this;
   }
 
+  /// Description of the state of the Body
   struct State {
+    // body constants
     const float inverse_mass;
-    const raylib::Matrix inverse_inertia_tensor;
-    const raylib::Vector3 net_force, net_torque;
+    const raylib::Matrix inverse_body_inertia_tensor;
 
+    // state
     raylib::Vector3 position, linear_momentum;
     raylib::Quaternion orientation;
     raylib::Vector3 angular_momentum;
 
-    const raylib::Vector3 velocity() const {
-      return linear_momentum * inverse_mass;
-    }
-    const raylib::Vector3 angular_velocity() const {
-      return angular_momentum.Transform(inverse_inertia_tensor);
-    }
+    // derived quantities
+    raylib::Matrix inverse_inertia_tensor;
+    raylib::Matrix rotation_matrix;
+    raylib::Vector3 velocity, angular_velocity;
 
-    // State operator-(const State &other) const {
-    //   return {
-    //       .inverse_mass = inverse_mass,
-    //       .inverse_inertia_tensor = inverse_inertia_tensor,
-    //       .net_force = net_force - other.net_force,
-    //       .net_torque = net_torque - other.net_torque,
-    //       .position = position - other.position,
-    //       .linear_momentum = linear_momentum - other.linear_momentum,
-    //       .orientation = orientation - other.orientation,
-    //       .angular_momentum = angular_momentum - other.angular_momentum
-    //   };
-    // };
+    // computed
+    raylib::Vector3 net_force, net_torque;
+
+    /// Derivative of the State
+    struct Derivative {
+      // position, orientation
+      raylib::Vector3 velocity, angular_velocity;
+      // linear_momentum, angular_momentum
+      raylib::Vector3 force, torque;
+    };
+
+    Derivative dydt(const double t, const State &state) const {
+      return {
+
+      };
+    }
   };
 
-  State state() {
-    return {
-        .inverse_mass = inverse_mass(),
-        .inverse_inertia_tensor = inverse_inertia_tensor(),
-        .position = position(),
-        .linear_momentum = linear_momentum(),
-        .orientation = orientation(),
-        .angular_momentum = angular_momentum(),
-    };
-  }
-  void state(const State &state) {
-    _position = state.position;
-    _linear_momentum = state.linear_momentum;
-    _orientation = state.orientation;
-    _angular_momentum = state.angular_momentum;
-  }
+  // struct Change {
+  //   raylib::Vector3 velocity, angular_velocity;
+  //   raylib::Vector3 force, torque;
+  // };
+  //
+  // static const State update(const float delta, const State &state) {
+  //   return {
+  //       .inverse_mass = state.inverse_mass,
+  //       .inverse_inertia_tensor = state.inverse_inertia_tensor,
+  //       .net_force = state.net_force,
+  //       .net_torque = state.net_torque,
+  //
+  //       .position = state.position + state.velocity() * delta,
+  //       .linear_momentum = state.linear_momentum + state.net_force * delta,
+  //       .orientation =
+  //           (state.orientation *
+  //            angular_velocity_to_rotation(state.angular_velocity(), delta))
+  //               .Normalize(),
+  //       .angular_momentum = state.angular_momentum + state.net_torque *
+  //       delta,
+  //   };
+  // }
+  //
+  // State operator+(const State &other) const {
+  //   if (inverse_mass != other.inverse_mass ||
+  //       inverse_inertia_tensor != other.inverse_inertia_tensor ||
+  //       net_force != other.net_force || net_torque != other.net_torque)
+  //     throw std::runtime_error("incompatible state can't be added");
+  //
+  //   return {
+  //       .inverse_mass = inverse_mass,
+  //       .inverse_inertia_tensor = inverse_inertia_tensor,
+  //       .net_force = net_force,
+  //       .net_torque = net_torque,
+  //       .position = position + other.position,
+  //       .linear_momentum = linear_momentum + other.linear_momentum,
+  //       .orientation = orientation * other.orientation,
+  //       .angular_momentum = angular_momentum + other.angular_momentum
+  //   };
+  // }
+  //
+  // State operator-(const State &other) const {
+  //   if (inverse_mass != other.inverse_mass ||
+  //       inverse_inertia_tensor != other.inverse_inertia_tensor ||
+  //       net_force != other.net_force || net_torque != other.net_torque)
+  //     throw std::runtime_error("incompatible state can't be added");
+  //
+  //   return {
+  //       .inverse_mass = inverse_mass,
+  //       .inverse_inertia_tensor = inverse_inertia_tensor,
+  //       .net_force = net_force,
+  //       .net_torque = net_torque,
+  //       .position = position - other.position,
+  //       .linear_momentum = linear_momentum - other.linear_momentum,
+  //       .orientation = orientation * other.orientation.Invert(),
+  //       .angular_momentum = angular_momentum + other.angular_momentum,
+  //   };
+  // }
+
+  // State state() {
+  //   return {
+  //       .inverse_mass = _inverse_mass,
+  //       .inverse_inertia_tensor = _inverse_inertia_tensor,
+  //       .net_force = _net_force,
+  //       .net_torque = _net_torque,
+  //       .position = _position,
+  //       .linear_momentum = _linear_momentum,
+  //       .orientation = _orientation,
+  //       .angular_momentum = _angular_momentum,
+  //   };
+  // }
+
+  // void state(const State &state) {
+  //   _position = state.position;
+  //   _linear_momentum = state.linear_momentum;
+  //   _orientation = state.orientation;
+  //   _angular_momentum = state.angular_momentum;
+  //   update_velocity();
+  //   update_angular_velocity();
+  //   update_inverse_inertia_tensor();
+  // }
 
   float mass() const { return 1.f / _inverse_mass; }
   float inverse_mass() const { return _inverse_mass; }
@@ -199,7 +268,7 @@ protected:
   ) {
     // std::println("Applied force: {} at offset: {}", force, offset);
 
-    // ignore very small forces
+    // ignore small forces
     if (force.Length() <= EPSILON)
       return;
 
@@ -219,25 +288,26 @@ protected:
     // std::println();
   };
 
-  static State state_change(const float delta, const State &state) {
-    auto new_state = state;
-
-    // dP = F ⋅ dt
-    new_state.linear_momentum = state.linear_momentum + state.net_force * delta;
-    // dx = v ⋅ dt
-    new_state.position = state.position + new_state.velocity() * delta;
-
-    // dL = τ ⋅ dt
-    new_state.angular_momentum =
-        state.angular_momentum + state.net_torque * delta;
-    // dq = ω ⋅ dt
-    new_state.orientation =
-        (state.orientation *
-         angular_velocity_to_rotation(new_state.angular_velocity(), delta))
-            .Normalize();
-
-    return new_state;
-  }
+  // static State state_change(const float delta, const State &state) {
+  //   auto new_state = state;
+  //
+  //   // dP = F ⋅ dt
+  //   new_state.linear_momentum = state.linear_momentum + state.net_force *
+  //   delta;
+  //   // dx = v ⋅ dt
+  //   new_state.position = state.position + new_state.velocity() * delta;
+  //
+  //   // dL = τ ⋅ dt
+  //   new_state.angular_momentum =
+  //       state.angular_momentum + state.net_torque * delta;
+  //   // dq = ω ⋅ dt
+  //   new_state.orientation =
+  //       (state.orientation *
+  //        angular_velocity_to_rotation(new_state.angular_velocity(), delta))
+  //           .Normalize();
+  //
+  //   return new_state;
+  // }
 
   void body_update(const float delta) {
     update_position(delta);
@@ -311,7 +381,7 @@ private:
 
     _net_torque = raylib::Vector3::Zero();
 
-    // ignore very small angular velocities
+    // ignore small angular velocities
     if (_angular_velocity.Length() <= EPSILON)
       return;
 
