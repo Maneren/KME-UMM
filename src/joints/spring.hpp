@@ -21,6 +21,5 @@ public:
 protected:
   float stiffness;
   float relaxed_length;
-  float last_length = -1.f;
   float damping = 0.0f;
 };

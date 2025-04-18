@@ -9,57 +9,68 @@ void SpringJoint::update(const float delta) {
   const auto position_a = _body_a->position() + offset_a;
   const auto position_b = _body_b->position() + offset_b;
 
-  // 𝕩 = b - a
+  // Hooke's law: F = k (|𝐱| - x₀) - μvᵣ
+
+  // 𝐱 = 𝐛 - 𝐚
   const auto connection = position_b - position_a;
 
-  std::println("position_a: {}, position_b: {}", position_a, position_b);
-
-  // x = |𝕩|
+  // x = |𝐱|
   const auto length = connection.Length();
 
-  // Δx = x - x0
+  // 𝐱' = 𝐱 / |𝐱|
+  const auto direction = connection.Scale(1.f / length);
+
+  // vᵣ = (𝐯₂ - 𝐯₁) ⋅ 𝐱'
+  const auto relative_velocity =
+      (_body_b->velocity() - _body_a->velocity()).DotProduct(direction);
+
+  std::println(
+      "position_a: {}, position_b: {}, relative_velocity: {}",
+      position_a,
+      position_b,
+      relative_velocity
+  );
+
+  // Δx = x - x₀
   const auto length_delta = length - relaxed_length;
 
   color = (length_delta >= 0.f) ? raylib::Color::Green()
                                 : raylib::Color::DarkGreen();
 
-  std::println("relaxed_length: {}, distance: {}", relaxed_length, length);
+  std::println(
+      "relaxed_length: {}, length: {} ({})",
+      relaxed_length,
+      length,
+      length_delta
+  );
 
   // |F| = k Δx
   auto force_magnitude = stiffness * length_delta;
 
   std::println("force_magnitude: {}", force_magnitude);
 
+  // ignore very small forces
   if (std::abs(force_magnitude) <= EPSILON)
     return;
 
-  if (damping > 0.f && last_length >= 0.f) {
-    // dx
-    const auto length_delta = last_length - length;
-    // v = dx / dt
-    const auto velocity = length_delta / delta;
-
+  if (damping > 0.f) {
+    // d = μvᵣ
+    const auto damping_magnitude = damping * relative_velocity;
     // |F'| = |F| - μv
-    const auto damped = force_magnitude - damping * velocity;
+    const auto damped = force_magnitude - damping_magnitude;
 
     std::println(
-        "delta: {}, length_delta: {}, velocity: {}, force: {}, "
-        "damping: {} -> {}",
-        delta,
-        length_delta,
-        velocity,
+        "force: {}, damping: {} -> {}",
         force_magnitude,
-        damping * velocity,
+        damping_magnitude,
         damped
     );
 
     force_magnitude = damped;
   }
 
-  last_length = length;
-
-  // F = |F| 𝕩 / |𝕩|
-  const auto force_a = connection.Scale(force_magnitude / length);
+  // F = |F| 𝐱'
+  const auto force_a = direction * force_magnitude;
   const auto force_b = -force_a;
   std::println("force_a: {}, force_b: {}", force_a, force_b);
   std::println();
