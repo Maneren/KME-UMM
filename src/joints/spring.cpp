@@ -34,8 +34,12 @@ void SpringJoint::update(const float) {
   // Δx = x - x₀
   const auto length_delta = length - relaxed_length;
 
-  color = (length_delta >= 0.f) ? raylib::Color::Green()
-                                : raylib::Color::DarkGreen();
+  if (std::abs(length_delta) <= 10e-3f)
+    color = raylib::Color::Blue();
+  else if (length_delta > 0.f)
+    color = raylib::Color::Green();
+  else
+    color = raylib::Color::DarkGreen();
 
   std::println(
       "relaxed_length: {}, length: {} ({})",
