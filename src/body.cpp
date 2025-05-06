@@ -1,7 +1,6 @@
 #include "body.hpp"
 #include "consts.hpp"
 #include "utils.hpp"
-#include <print>
 
 raylib::Vector3 Body::transform_point(const raylib::Vector3 &point) const {
   // 𝐑 𝐱
@@ -55,6 +54,7 @@ void Body::body_update(const float delta) {
 void Body::update_position(const float delta) {
   // d𝐏 = 𝐅 ⋅ dt
   _linear_momentum += _net_force * delta;
+  _net_force = raylib::Vector3::Zero();
 
   // Friction and other environmental forces
   // 𝐏' = (1 - μ)ᵈᵗ 𝐏
@@ -64,21 +64,18 @@ void Body::update_position(const float delta) {
 
   // d𝐱 = 𝐯 ⋅ dt
   _position += _velocity * delta;
-
-  _net_force = raylib::Vector3::Zero();
 }
 
 void Body::update_orientation(const float delta) {
   // d𝐋 = 𝛕 dt
   _angular_momentum += _net_torque * delta;
+  _net_torque = raylib::Vector3::Zero();
 
   // Friction and other environmental forces
   // 𝐋' = (1 - μ)ᵈᵗ 𝐋
   _angular_momentum *= std::pow(1.f - ENVIRONMENT_FRICTION_COEFFICIENT, delta);
 
   update_angular_velocity();
-
-  _net_torque = raylib::Vector3::Zero();
 
   // ignore small angular velocities
   if (_angular_velocity.Length() <= EPSILON)

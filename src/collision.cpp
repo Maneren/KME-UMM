@@ -100,7 +100,7 @@ void Contact::resolve() const {
       (point_b_velocity - point_a_velocity).DotProduct(normal);
 
   if (relative_velocity >= -EPSILON) {
-    // not colliding
+    // moving apart already
     return;
   }
 
@@ -135,6 +135,7 @@ void Contact::resolve() const {
       angular_a,
       angular_b
   );
+  // j
   const auto impulse_magnitude = numerator / denominator;
 
   std::println("impulse: {}", impulse_magnitude);
