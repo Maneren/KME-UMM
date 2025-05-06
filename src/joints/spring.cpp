@@ -1,4 +1,5 @@
 #include "spring.hpp"
+#include <print>
 
 void SpringJoint::update(const float) {
   const auto offset_a = _body_a->transform_point(_anchor_a);
@@ -54,4 +55,24 @@ void SpringJoint::update(const float) {
 
   _body_a->apply_force(force_a, offset_a);
   _body_b->apply_force(force_b, offset_b);
+}
+
+float SpringJoint::potential_energy() const {
+  const auto offset_a = _body_a->transform_point(_anchor_a);
+  const auto offset_b = _body_b->transform_point(_anchor_b);
+
+  const auto position_a = _body_a->position() + offset_a;
+  const auto position_b = _body_b->position() + offset_b;
+
+  // 𝐱 = 𝐛 - 𝐚
+  const auto connection = position_b - position_a;
+
+  // x = |𝐱|
+  const auto length = connection.Length();
+
+  // Δx = x - x₀
+  const auto length_delta = length - relaxed_length;
+
+  // U = ½ k Δx²
+  return 0.5f * stiffness * length_delta * length_delta;
 }

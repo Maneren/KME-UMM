@@ -18,6 +18,8 @@ public:
 
   void update(const float dt) override;
 
+  float potential_energy() const;
+
 protected:
   float stiffness;
   float relaxed_length;

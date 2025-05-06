@@ -224,6 +224,10 @@ int main() {
           // const auto state = body->state();
           //
           // ode<Body::State>(Body::State::update, state, STEP_TIME);
+        } else if (const auto spring =
+                       std::dynamic_pointer_cast<SpringJoint>(object);
+                   spring) {
+          total_energy += spring->potential_energy();
         }
 
         object->update(STEP_TIME);
@@ -289,7 +293,7 @@ int main() {
     window.DrawFPS();
 
     DrawText(
-        std::format("Total kinetic energy: {:.2g} J", total_energy).c_str(),
+        std::format("Total energy: {:.2g} J", total_energy).c_str(),
         10,
         30,
         20,
