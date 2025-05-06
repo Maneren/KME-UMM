@@ -196,6 +196,8 @@ int main() {
     //----------------------------------------------------------------------------------
     const auto simulation_time = window.GetTime();
 
+    float total_energy;
+
     while (physics_time < simulation_time) {
       // std::println(
       //     "\n\nStepping physics... {} -> {}",
@@ -209,18 +211,20 @@ int main() {
       // cube2->apply_force(GRAVITY * cube2->mass());
       // cube3->apply_force(GRAVITY * cube3->mass());
 
+      total_energy = 0.0f;
+
       // Update all alive objects
       for (const auto &object : game_objects) {
         if (!object->alive)
           continue;
 
-        // if (const auto body = std::dynamic_pointer_cast<Body>(object); body)
-        // {
-        //   // body->apply_force(GRAVITY * body->mass());
-        //   const auto state = body->state();
-        //
-        //   ode<Body::State>(Body::State::update, state, STEP_TIME);
-        // }
+        if (const auto body = std::dynamic_pointer_cast<Body>(object); body) {
+          total_energy += body->linear_energy() + body->angular_energy();
+          // body->apply_force(GRAVITY * body->mass());
+          // const auto state = body->state();
+          //
+          // ode<Body::State>(Body::State::update, state, STEP_TIME);
+        }
 
         object->update(STEP_TIME);
       }
@@ -283,6 +287,14 @@ int main() {
     camera.EndMode();
 
     window.DrawFPS();
+
+    DrawText(
+        std::format("Total kinetic energy: {:.2g} J", total_energy).c_str(),
+        10,
+        30,
+        20,
+        raylib::Color::Lime()
+    );
 
     window.EndDrawing();
     //----------------------------------------------------------------------------------
