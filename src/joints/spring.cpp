@@ -1,6 +1,4 @@
 #include "spring.hpp"
-#include <Vector3.hpp>
-#include <print>
 
 void SpringJoint::update(const float) {
   const auto offset_a = _body_a->transform_point(_anchor_a);
@@ -24,13 +22,6 @@ void SpringJoint::update(const float) {
   const auto relative_velocity =
       (_body_b->velocity() - _body_a->velocity()).DotProduct(direction);
 
-  std::println(
-      "position_a: {}, position_b: {}, relative_velocity: {}",
-      position_a,
-      position_b,
-      relative_velocity
-  );
-
   // Δx = x - x₀
   const auto length_delta = length - relaxed_length;
 
@@ -41,17 +32,8 @@ void SpringJoint::update(const float) {
   else
     color = raylib::Color::DarkGreen();
 
-  std::println(
-      "relaxed_length: {}, length: {} ({})",
-      relaxed_length,
-      length,
-      length_delta
-  );
-
   // |F| = k Δx
   auto force_magnitude = stiffness * length_delta;
-
-  std::println("force_magnitude: {}", force_magnitude);
 
   // ignore small forces
   if (std::abs(force_magnitude) <= EPSILON)
@@ -63,21 +45,12 @@ void SpringJoint::update(const float) {
     // |F'| = |F| - μv
     const auto damped = force_magnitude - damping_magnitude;
 
-    std::println(
-        "force: {}, damping: {} -> {}",
-        force_magnitude,
-        damping_magnitude,
-        damped
-    );
-
     force_magnitude = damped;
   }
 
   // F = |F| 𝐱'
   const auto force_a = direction * force_magnitude;
   const auto force_b = -force_a;
-  std::println("force_a: {}, force_b: {}", force_a, force_b);
-  std::println();
 
   _body_a->apply_force(force_a, offset_a);
   _body_b->apply_force(force_b, offset_b);

@@ -2,6 +2,7 @@
 
 #include "polyhedron.hpp"
 #include <Vector3.hpp>
+#include <format>
 #include <memory>
 #include <optional>
 #include <variant>

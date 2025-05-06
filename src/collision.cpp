@@ -1,4 +1,6 @@
 #include "collision.hpp"
+#include "consts.hpp"
+#include "defs.hpp"
 #include <print>
 
 std::optional<SupportPoint> find_support_point(

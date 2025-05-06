@@ -5,6 +5,7 @@
 #include <Color.hpp>
 #include <Mesh.hpp>
 #include <Vector3.hpp>
+#include <span>
 
 class Polyhedron final : public Body {
 public:

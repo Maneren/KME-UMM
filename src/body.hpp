@@ -1,10 +1,7 @@
 #pragma once
 
-#include "consts.hpp"
-#include "defs.hpp"
 #include "object.hpp"
 #include "ode.hpp"
-#include "utils.hpp"
 #include <Image.hpp>
 #include <Material.hpp>
 #include <Mesh.hpp>
@@ -12,8 +9,6 @@
 #include <Texture.hpp>
 #include <Vector3.hpp>
 #include <Vector4.hpp>
-#include <cmath>
-#include <print>
 #include <raymath.h>
 
 class Body : public Object {
@@ -172,28 +167,36 @@ public:
   //   update_inverse_inertia_tensor();
   // }
 
-  float mass() const { return 1.f / _inverse_mass; }
-  float inverse_mass() const { return _inverse_mass; }
+  inline float mass() const { return 1.f / _inverse_mass; }
+  inline float inverse_mass() const { return _inverse_mass; }
 
-  const raylib::Matrix &inverse_inertia_tensor() const {
+  inline const raylib::Matrix &inverse_inertia_tensor() const {
     return _inverse_inertia_tensor;
   }
 
-  raylib::Vector3 &position() { return _position; };
-  raylib::Vector3 &linear_momentum() { return _linear_momentum; }
-  const raylib::Vector3 &velocity() const { return _velocity; }
-  const raylib::Vector3 &force() const { return _net_force; }
+  inline raylib::Vector3 &position() { return _position; };
+  inline raylib::Vector3 &linear_momentum() { return _linear_momentum; }
+  inline const raylib::Vector3 &velocity() const { return _velocity; }
+  inline const raylib::Vector3 &force() const { return _net_force; }
 
-  raylib::Quaternion &orientation() { return _orientation; }
-  raylib::Vector3 &angular_momentum() { return _angular_momentum; }
-  const raylib::Vector3 &angular_velocity() const { return _angular_velocity; }
-  const raylib::Vector3 &torque() const { return _net_torque; }
+  inline raylib::Quaternion &orientation() { return _orientation; }
+  inline raylib::Vector3 &angular_momentum() { return _angular_momentum; }
+  inline const raylib::Vector3 &angular_velocity() const {
+    return _angular_velocity;
+  }
+  inline const raylib::Vector3 &torque() const { return _net_torque; }
 
-  const raylib::Vector3 point_velocity(const raylib::Vector3 &point) const {
-    return _velocity + _angular_velocity.CrossProduct(point);
+  inline const raylib::Texture &texture() const { return _texture; }
+
+  inline float linear_energy() const {
+    // Eₖ = ½ |𝐏|² m⁻¹ (equivalent to Eₖ = ½ m |𝐯|², where 𝐯 = 𝐏 / m)
+    return 0.5f * _linear_momentum.LengthSqr() * _inverse_mass;
   }
 
-  const raylib::Texture &texture() const { return _texture; }
+  inline float angular_energy() const {
+    // Eₘ = ½ 𝐋 ⋅ 𝛚 (equivalent to Eₘ = ½ 𝐈𝛚², since 𝛚 = 𝐈⁻¹𝐋)
+    return _angular_velocity.DotProduct(_angular_momentum) * 0.5f;
+  }
 
   virtual void initialize() override {
     raylib::Image image = raylib::Image::Color(1, 1, _color);
@@ -214,9 +217,8 @@ public:
     _model.DrawWires(_position, 1.0f, raylib::Color::Black());
   }
 
-  raylib::Vector3 transform_point(const raylib::Vector3 &point) const {
-    return point.Transform(_model.transform);
-  }
+  raylib::Vector3 transform_point(const raylib::Vector3 &point) const;
+  raylib::Vector3 point_velocity(const raylib::Vector3 &point) const;
 
   virtual void apply_force(
       const raylib::Vector3 &force,
@@ -249,44 +251,12 @@ protected:
   virtual raylib::MeshUnmanaged get_mesh() = 0;
   virtual const raylib::Matrix &inverse_body_inertia_tensor() const = 0;
 
-  void update_velocity() {
-    // 𝐯 = 𝐏 / m
-    _velocity = _linear_momentum * _inverse_mass;
-  }
-  void update_angular_velocity() {
-    // 𝛚 = 𝐈⁻¹𝐋
-    _angular_velocity = _angular_momentum.Transform(_inverse_inertia_tensor);
-  }
-  void update_inverse_inertia_tensor() {
-    const raylib::Matrix &R = _model.transform;
-    // 𝐈⁻¹ = 𝐑 𝐈⁻¹₀ 𝐑ᵀ
-    _inverse_inertia_tensor = R * inverse_body_inertia_tensor() * R.Transpose();
-  }
+  void update_velocity();
+  void update_angular_velocity();
+  void update_inverse_inertia_tensor();
 
-  void body_apply_force(
-      const raylib::Vector3 &force, const raylib::Vector3 &offset
-  ) {
-    // std::println("Applied force: {} at offset: {}", force, offset);
-
-    // ignore small forces
-    if (force.Length() <= EPSILON)
-      return;
-
-    _net_force += force;
-
-    // only consider off center forces for torque
-    if (offset.Length() <= EPSILON)
-      return;
-
-    // 𝛕 = 𝐫 × 𝐅
-    const auto torque =
-        transform_point(offset).CrossProduct(transform_point(force));
-
-    // std::println("Resulting in torque: {}", torque);
-
-    _net_torque += torque;
-    // std::println();
-  };
+  void
+  body_apply_force(const raylib::Vector3 &force, const raylib::Vector3 &offset);
 
   // static State state_change(const float delta, const State &state) {
   //   auto new_state = state;
@@ -309,94 +279,10 @@ protected:
   //   return new_state;
   // }
 
-  void body_update(const float delta) {
-    update_position(delta);
-    update_orientation(delta);
-
-    // std::println(
-    //     "linear_momentum: {} kg m s⁻¹, angular_momentum: {} kg m² s⁻¹",
-    //     _linear_momentum.Length(),
-    //     _angular_momentum.Length()
-    // );
-
-    // // Eₖ = |𝐏|² / 2m (equivalent to Eₖ = ½ m |𝐯|², where 𝐯 = 𝐏 / m)
-    // const auto linear_energy =
-    //     _linear_momentum.LengthSqr() * 0.5f * _inverse_mass;
-    //
-    // // Eₘ = ½ 𝐋 ⋅ 𝛚 (equivalent to Eₘ = ½ 𝐈𝛚², since 𝛚 = 𝐈⁻¹𝐋)
-    // const auto angular_energy =
-    //     _angular_velocity.DotProduct(_angular_momentum) * 0.5f;
-    //
-    //   std::println(
-    //       "linear_energy: {} J + angular_energy: {} J = {} J",
-    //       linear_energy,
-    //       angular_energy,
-    //       linear_energy + angular_energy
-    //   );
-    //   std::println();
-  };
+  void body_update(const float delta);
 
 private:
-  void update_position(const float delta) {
-    // d𝐏 = 𝐅 ⋅ dt
-    _linear_momentum += _net_force * delta;
+  void update_position(const float delta);
 
-    // Friction and other environmental forces
-    // 𝐏' = (1 - μ)ᵈᵗ 𝐏
-    _linear_momentum *= std::pow(1.f - ENVIRONMENT_FRICTION_COEFFICIENT, delta);
-
-    update_velocity();
-
-    // d𝐱 = 𝐯 ⋅ dt
-    _position += _velocity * delta;
-
-    // std::println(
-    //     "position: {}, linear_momentum: {}, velocity: {}",
-    //     _position,
-    //     _linear_momentum,
-    //     _velocity
-    // );
-
-    _net_force = raylib::Vector3::Zero();
-    // std::println();
-  }
-
-  void update_orientation(const float delta) {
-    // d𝐋 = 𝛕 dt
-    _angular_momentum += _net_torque * delta;
-
-    // Friction and other environmental forces
-    // 𝐋' = (1 - μ)ᵈᵗ 𝐋
-    _angular_momentum *=
-        std::pow(1.f - ENVIRONMENT_FRICTION_COEFFICIENT, delta);
-
-    update_angular_velocity();
-
-    // std::println(
-    //     "torque: {}, angular_momentum: {}, angular_velocity: {}",
-    //     _net_torque,
-    //     _angular_momentum,
-    //     _angular_velocity
-    // );
-
-    _net_torque = raylib::Vector3::Zero();
-
-    // ignore small angular velocities
-    if (_angular_velocity.Length() <= EPSILON)
-      return;
-
-    const auto delta_q = angular_velocity_to_rotation(_angular_velocity, delta);
-
-    // q' = q * dq
-    const auto rotated = (_orientation * delta_q).Normalize();
-
-    // std::println("orientation: {}, rotation: {}", _orientation, delta_q);
-    // std::println("rotated: {}", rotated);
-    // std::println();
-
-    _orientation = rotated;
-    _model.transform = rotated.ToMatrix();
-
-    update_inverse_inertia_tensor();
-  }
+  void update_orientation(const float delta);
 };
