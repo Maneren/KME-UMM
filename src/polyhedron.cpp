@@ -146,15 +146,6 @@ Polyhedron::Polyhedron(
   _inverse_body_inertia_tensor = inertia_tensor.Invert();
   _inverse_mass = 1.f / mass;
 
-  std::println(
-      "mass: {}, center of mass: {}, inverse mass: {}",
-      mass,
-      center_of_mass,
-      _inverse_mass
-  );
-  std::println("inertia tensor: {}", inertia_tensor);
-  std::println("inverse inertia tensor: {}", _inverse_body_inertia_tensor);
-
   if (center_of_mass.Length() >= EPSILON) {
     // Move mesh origin to the center of mass
     for (auto &vertex : mesh_vertices) {
