@@ -63,16 +63,17 @@ Polyhedron::Polyhedron(
   raylib::Vector3 Iprime{0.f, 0.f, 0.f}; // non diagonal elements
 
   for (const auto &[a, b, c, _] : _faces) {
-    // |J| = a ⋅ (b × c) (essentialy a volume of cuboid around the tetrahedron)
+    // |𝐉| = 𝐚 ⋅ (𝐛 × 𝐜) (essentialy a volume of parallelopiped around the
+    // tetrahedron)
     const float determinant_J = a.DotProduct(b.CrossProduct(c));
 
-    // Vₜ = |J| / 6
+    // Vₜ = |𝐉| / 6
     const float tetra_volume = determinant_J / 6.0;
 
-    // mₜ = Vₜ * ρ
+    // mₜ = Vₜ ⋅ ρ
     const float tetra_mass = _density * tetra_volume;
 
-    // Cₜ = (a + b + c + d) / 4, where d = (0, 0, 0)
+    // 𝐂ₜ = (𝐚 + 𝐛 + 𝐜 + 𝐝) / 4, where 𝐝 = (0, 0, 0)
     const raylib::Vector3 tetra_center_of_mass = (a + b + c) / 4.f;
 
     mass += tetra_mass;
