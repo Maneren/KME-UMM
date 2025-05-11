@@ -46,83 +46,84 @@
 \section{Úvod}
 %------------------------------------------------
 \begin{frame}{Zadání a co jsme chtěli}
-    \begin{itemize}
-        \item Vyzkoušet si základní mechanické simulace
-        \item Naučit se dělat \uv{fyziku} do her
-        \item Potřeba real-time výpočtů
-    \end{itemize}
+  \begin{itemize}
+    \item Vyzkoušet si základní mechanické simulace
+    \item Naučit se dělat \uv{fyziku} do her
+    \item Potřeba real-time výpočtů
+    \item Cíl: Simulace odpružení jednoduchého vozidlo
+  \end{itemize}
 \end{frame}
 %------------------------------------------------
 \begin{frame}{Urychlení a zjednodušení}
-    \begin{columns}[c]
-        \column{.45\textwidth}
-        \begin{itemize}
-            \item Odloučení grafického modelu a mechanické simulace
-            \item Zjednodušení modelu mechanické simulace
-            \item Předpočítaná řešení
-            \item Nahrazení složitých jevů konstantou, např. odpor vzduchu
-        \end{itemize}
+  \begin{columns}[c]
+    \column{.45\textwidth}
+    \begin{itemize}
+      \item Odloučení grafického modelu a mechanické simulace
+      \item Zjednodušení modelu mechanické simulace
+      \item Předpočítaná řešení
+      \item Nahrazení složitých jevů konstantou, např. odpor vzduchu a tření
+    \end{itemize}
 
-        \column{.45\textwidth} % Right column and width
-        \begin{figure}
-            \centering
-            \includegraphics[width=1\linewidth]{img/BoundingBoxes.png}
-            \caption{Typy kolizních tvarů}
-        \end{figure}
-    \end{columns}
+    \column{.45\textwidth}
+    \begin{figure}
+      \centering
+      \includegraphics[width=1\linewidth]{img/BoundingBoxes.png}
+      \caption{Typy kolizních tvarů}
+    \end{figure}
+  \end{columns}
 \end{frame}
 %------------------------------------------------
 \section{Slepé cesty}
 %------------------------------------------------
 \begin{frame}{Unity}
-    \begin{columns}[c]
-        \column{.45\textwidth}
-        \begin{itemize}
-            \item Herní engine Unity
-            \item Nabízí většinu \uv{fyziky} již vyřešenou
-            \item \uv{Bylo by to moc snadné}
-        \end{itemize}
+  \begin{columns}[c]
+    \column{.45\textwidth}
+    \begin{itemize}
+      \item Herní engine Unity
+      \item Nabízí většinu \uv{fyziky} již vyřešenou
+      \item \uv{Bylo by to moc snadné}
+    \end{itemize}
 
-        \column{.45\textwidth}
-        \begin{figure}
-            \centering
-            \includegraphics[width=1\linewidth]{img/unity.png}
-        \end{figure}
-    \end{columns}
+    \column{.45\textwidth}
+    \begin{figure}
+      \centering
+      \includegraphics[width=1\linewidth]{img/unity.png}
+    \end{figure}
+  \end{columns}
 \end{frame}
 %------------------------------------------------
 \begin{frame}{Raylib}
-    \begin{columns}[c]
-        \column{.45\textwidth}
-        \begin{itemize}
-            \item Knihovna napsaná v C
-            \item Binding do různých jazyků, v našem případě \CC
-            \item Postavena nad OpenGL
-            \item Nemá vlastní \uv{fyziku}
-        \end{itemize}
+  \begin{columns}[c]
+    \column{.45\textwidth}
+    \begin{itemize}
+      \item Knihovna napsaná v C
+      \item Binding do různých jazyků, v našem případě \CC
+      \item Postavena nad OpenGL
+      \item Nemá vlastní \uv{fyziku}
+    \end{itemize}
 
-        \column{.45\textwidth}
-        \begin{figure}
-            \centering
-            \includegraphics[width=1\linewidth]{img/Raylib.png}
-        \end{figure}
-    \end{columns}
+    \column{.45\textwidth}
+    \begin{figure}
+      \centering
+      \includegraphics[width=1\linewidth]{img/Raylib.png}
+    \end{figure}
+  \end{columns}
 \end{frame}
 %------------------------------------------------
 \begin{frame}{Auto}
-    \begin{figure}
-        \centering
-        \includegraphics[width=0.6\linewidth]{img/auto.png}
-        \caption{\uv{Auto}}
-    \end{figure}
+  \begin{figure}
+    \centering
+    \includegraphics[width=0.6\linewidth]{img/auto.png}
+    \caption{\uv{Auto}}
+  \end{figure}
 \end{frame}
 %------------------------------------------------
 \begin{frame}{Motocykl}
-    \begin{figure}
-        \centering
-        \includegraphics[width=0.6\linewidth]{img/motorcycle.png}
-        \caption{\uv{Motocykl}}
-    \end{figure}
+  \begin{figure}
+    \centering
+    \includegraphics[width=0.6\linewidth]{img/motorcycle.png}
+    \caption{\uv{Motocykl}}
+  \end{figure}
 \end{frame}
 %------------------------------------------------
 
@@ -135,8 +136,9 @@
     \item Diferenciální rovnice popisují změnu
     \item Jednoduché se dají řešit analyticky
     \item Složitější (náš případ) lze řešit pouze numericky
-      \cite{hirsch1970}
   \end{itemize}
+  \vspace{0.25cm}
+  \cite{hirsch1970}
 \end{frame}
 %------------------------------------------------
 \begin{frame}{Numerické metody řešení diferenciálních rovnic}
@@ -155,14 +157,16 @@
 \begin{frame}{Čas}
   \begin{itemize}
     \item Simulaci i grafiku je nutné vyhodnocovat v diskrétních časových bodech
-    \item Pro jednoduché případy mohou být stejné (\uv{posunu objekty a vykreslím})
+    \item Pro jednoduché případy mohou být stejné
+      (\uv{posunu objekty a vykreslím})
     \item Pro lepší výsledky by měly být nezávislé
       \begin{itemize}
         \item grafika co nejčastěji podle výkonu
         \item simulace co nejpravidelněji v čase
       \end{itemize}
+      \vspace{0.25cm}
+      \cite{eberly2010}
   \end{itemize}
-  \cite{eberly2010}
 \end{frame}
 %------------------------------------------------
 \section{Mechanika}
@@ -170,8 +174,8 @@
 \subsection{Tuhé těleso}
 \begin{frame}{Tuhé těleso}
   \begin{itemize}
-    \item Idealizované těleso, které působením sil nemění svůj tvar ani objem 
-    \item My předpokládame i složení z homogenního a izotropního materiálu
+    \item Idealizované těleso, které působením sil nemění svůj tvar ani objem
+    \item My předpokládáme i složení z homogenního a izotropního materiálu
     \item Používá se obecně pro zjednodušení modelování
       \vspace{0.5cm}
     \item K popisu je potřeba 6 parametrů:
@@ -179,11 +183,13 @@
         \item Hmotnost (konstanta) -- $m$
         \item Poloha -- $\mathbf{x}$
         \item Rychlost nebo hybnost -- $\mathbf{v}$ nebo $\mathbf{P}$
+          \vspace{0.25cm}
         \item Tenzor setrvačnosti (konstanta) -- $\mathbf{I}_0$
         \item Natočení -- $\mathbf{R}$
         \item Úhlová rychlost nebo hybnost -- $\mathbf{\omega}$ nebo
           $\mathbf{L}$
       \end{itemize}
+      \vspace{0.25cm}
       \cite{witkin1997}
       \cite{hecker1997}
       \cite{blackedout01_rigid_body}
@@ -199,18 +205,26 @@
           \frac{\mathbf{P}}{m}$
           \vspace{0.5cm}
         \item Úhlová hybnost -- $\mathbf{dL} = \mathbf{\tau}_{net} \cdot dt$
-        \item Natočení -- $\mathbf{dR} = \mathbf{\omega}^* \mathbf{R}$, kde 
+        \item Natočení -- $\mathbf{dR} = \mathbf{\omega}^* \mathbf{R}$, kde
           $\mathbf{\omega} = \mathbf{I}^{-1} \mathbf{L}$, kde $\mathbf{I} =
           \mathbf{R} \mathbf{I}_0 \mathbf{R}^T$
       \end{itemize}
       \vspace{0.5cm}
       \begin{equation}
-        \mathbf{a}^* \mathbf{R} = \begin{bmatrix}
-          \mathbf{a} \times \begin{bmatrix} r_{xx} \\ r_{xy} \\ r_{xz} \end{bmatrix} &&
-          \mathbf{a} \times \begin{bmatrix} r_{yx} \\ r_{yy} \\ r_{yz} \end{bmatrix} &&
-          \mathbf{a} \times \begin{bmatrix} r_{zx} \\ r_{zy} \\ r_{zz} \end{bmatrix}
+        \mathbf{a}^* \mathbf{R} =
+        \begin{bmatrix}
+          \mathbf{a} \times
+          \begin{bmatrix} r_{xx} \\ r_{xy} \\ r_{xz}
+          \end{bmatrix} &&
+          \mathbf{a} \times
+          \begin{bmatrix} r_{yx} \\ r_{yy} \\ r_{yz}
+          \end{bmatrix} &&
+          \mathbf{a} \times
+          \begin{bmatrix} r_{zx} \\ r_{zy} \\ r_{zz}
+          \end{bmatrix}
         \end{bmatrix}
       \end{equation}
+      \vspace{0.25cm}
       \cite{witkin1997}
       \cite{blackedout01_rigid_body}
   \end{itemize}
@@ -224,6 +238,7 @@
   \begin{equation}
     \mathbf{F} = -k\,\mathbf{r} - \mu\,\mathbf{v}
   \end{equation}
+  \vspace{0.25cm}
   \cite{kopcil_trejbalova}
   \cite{kiesslich_2d_physics}
 \end{frame}
@@ -240,6 +255,7 @@
         \item tenzor setrvačnosti $\mathbf{I}$ -- popisuje setrvačnost tělesa
           při obecném pohybu
       \end{itemize}
+      \vspace{0.25cm}
       \cite{mirtich1997}
       \cite{tonon2004}
   \end{itemize}
@@ -250,22 +266,22 @@
     \centering
     \includegraphics[width=0.8\linewidth]{img/donut_volume.png}
     \caption{Objem polyhedronu \cite{blackedout01_inertia_tensor}}
-    \label{fig:donut_volume}
   \end{figure}
 \end{frame}
 %------------------------------------------------
 \begin{frame}{Výpočet}
   \begin{enumerate}
     \item Pro každý trojúhelník sítě zkonstruujeme čtyřstěn
-    \begin{itemize}
-      \item Čtvrtý bod může být libovolný, nakonec se vykrátí
-      \item Spočítáme jeho hmotnost, těžiště a tenzor setrvačnosti
-    \end{itemize}
+      \begin{itemize}
+        \item Čtvrtý bod může být libovolný, nakonec se vykrátí
+        \item Spočítáme jeho hmotnost, těžiště a tenzor setrvačnosti
+      \end{itemize}
     \item Těžiště celého polyhedronu je průměr těžišť jednotlivých trojúhelníků
     \item Pomocí Steinerovy věty přesuneme osy otáčení čtyřstěnů do těžiště
       tělesa
     \item Takto upravené setrvačnosti sečteme
   \end{enumerate}
+  \vspace{0.25cm}
   \cite{blackedout01_inertia_tensor}
   \cite{tonon2004}
 \end{frame}
@@ -277,6 +293,7 @@
     \item Koule
     \item Trojúhelníková síť
   \end{itemize}
+  \vspace{0.25cm}
   \cite{press2007}
 \end{frame}
 %------------------------------------------------
@@ -295,14 +312,17 @@
       \end{equation}
     \item Vypočítá se vektor směru impulzu $\mathbf{j} = j \cdot \mathbf{n}$
     \item Vypočítá se nová rychlost tělese $\mathbf{v'} = \mathbf{v}
-  \pm \frac{1}{m} \cdot \mathbf{j}$
+      \pm \frac{1}{m} \cdot \mathbf{j}$
     \item Vypočítá se nová úhlová rychlost tělesa
       $\mathbf{\omega'} = \mathbf{\omega} \pm j \cdot
       \mathbf{I}^{-1}(\mathbf{r} \times \mathbf{n})$
   \end{enumerate}
+  \vspace{0.25cm}
   \cite{wikipedia_collision_response}
   \cite{leitner2019}
 \end{frame}
+%------------------------------------------------
+\section{Závěr}
 %------------------------------------------------
 \begin{frame}[allowframebreaks] {Zdroje}
   \footnotesize
