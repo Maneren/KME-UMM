@@ -38,7 +38,7 @@
   \titlepage
 \end{frame}
 
-\begin{frame}{Overview}
+\begin{frame}{Přehled}
   \tableofcontents
 \end{frame}
 
@@ -50,6 +50,7 @@
     \item Vyzkoušet si základní mechanické simulace
     \item Naučit se dělat \uv{fyziku} do her
     \item Potřeba real-time výpočtů
+    \item V praxi fyzikální engine: Unity, Chaos Engine, DMM Engine, Bullet,...
     \item Cíl: Simulace odpružení jednoduchého vozidlo
   \end{itemize}
 \end{frame}
@@ -186,13 +187,13 @@
           \vspace{0.25cm}
         \item Tenzor setrvačnosti (konstanta) -- $\mathbf{I}_0$
         \item Natočení -- $\mathbf{R}$
-        \item Úhlová rychlost nebo hybnost -- $\mathbf{\omega}$ nebo
-          $\mathbf{L}$
+        \item Úhlová hybnost -- $\mathbf{L}$
       \end{itemize}
       \vspace{0.25cm}
       \cite{witkin1997}
       \cite{hecker1997}
       \cite{blackedout01_rigid_body}
+      \cite{kopcil_trejbalova}
   \end{itemize}
 \end{frame}
 %------------------------------------------------
@@ -224,19 +225,20 @@
           \end{bmatrix}
         \end{bmatrix}
       \end{equation}
-      \vspace{0.25cm}
+      \vspace{0.5cm}
       \cite{witkin1997}
       \cite{blackedout01_rigid_body}
+      \cite{kopcil_trejbalova}
   \end{itemize}
 \end{frame}
 %------------------------------------------------
-\subsection{Pružiny}
-\begin{frame}{Pružiny}
+\subsection{Pružina}
+\begin{frame}{Pružina}
   \begin{itemize}
     \item Předpokládáme Hookův zákon
   \end{itemize}
   \begin{equation}
-    \mathbf{F} = -k\,\mathbf{r} - \mu\,\mathbf{v}
+    \mathbf{F} = -k\mathbf{r} - \mu\mathbf{v}
   \end{equation}
   \vspace{0.25cm}
   \cite{kopcil_trejbalova}
@@ -283,25 +285,52 @@
   \end{enumerate}
   \vspace{0.25cm}
   \cite{blackedout01_inertia_tensor}
+  \cite{mirtich1997}
   \cite{tonon2004}
 \end{frame}
 %------------------------------------------------
 \subsection{Kolize}
-\begin{frame}{Kolizní tvar}
+\begin{frame}{Detekce kolize}
   \begin{itemize}
-    \item Kvádr
-    \item Koule
-    \item Trojúhelníková síť
+    \item V mechanice se používá označení rázy
+    \item Kolizní tvar
+      \begin{itemize}
+        \item Kvádr
+        \item Koule
+        \item Trojúhelníková síť (polyhedron)
+      \end{itemize}
+    \item Pro všechny dvojice těles $T_1$ a $T_2$ zkontroluje dotyk/průnik
+      \begin{itemize}
+        \item vrchol -- stěna,
+        \item hrana -- hrana,
+        \item někdy i stěna -- stěna.
+      \end{itemize}
+    \item Z výsledku detekce určíme
+      \begin{itemize}
+        \item normálu kolize $\mathbf{n}$,
+        \item ramena vůči bodu dotyku $\mathbf{r}_1$ a $\mathbf{r}_2$,
+        \item vzájemnou rychlost bodů dotyku $\mathbf{v}_r$.
+      \end{itemize}
   \end{itemize}
   \vspace{0.25cm}
+  \cite{vimmr}
   \cite{press2007}
+  \cite{kleppmann_simulation}
+\end{frame}
+%------------------------------------------------
+\begin{frame}{Schéma}
+  \begin{figure}
+    \centering
+    \includegraphics[width=0.6\linewidth]{img/collision_response.png}
+    \caption{Schéma kolize vrchol -- stěna \cite{wikipedia_collision_response}}
+  \end{figure}
 \end{frame}
 %------------------------------------------------
 \begin{frame}{Vyhodnocení kolize}
   \begin{enumerate}
-    \item Vypočítá se velikost impulzu $j$
+    \item Vypočítáme velikost impulzu $j$
       \begin{equation}
-        j = \frac{-(1 + \epsilon) \mathbf{v}_r \cdot \mathbf{n}}{m_1^{-1} +
+        j_r = \frac{-(1 + \epsilon) \mathbf{v}_r \cdot \mathbf{n}}{m_1^{-1} +
           m_2^{-1} + \mathbf{n} \cdot \left(
             \left( \mathbf{I}_1^{-1} (\mathbf{r}_1 \times \mathbf{n})
             \right) \times
@@ -310,16 +339,18 @@
             \mathbf{r}_2
         \right)}
       \end{equation}
-    \item Vypočítá se vektor směru impulzu $\mathbf{j} = j \cdot \mathbf{n}$
-    \item Vypočítá se nová rychlost tělese $\mathbf{v'} = \mathbf{v}
-      \pm \frac{1}{m} \cdot \mathbf{j}$
-    \item Vypočítá se nová úhlová rychlost tělesa
-      $\mathbf{\omega'} = \mathbf{\omega} \pm j \cdot
+    \item Vypočítáme vektor směru impulzu $\mathbf{j}_r = j_r \cdot \mathbf{n}$
+    \item Vypočítáme novou rychlost tělesa $\mathbf{v'} = \mathbf{v}
+      \pm \frac{1}{m} \cdot \mathbf{j}_r$
+    \item Vypočítáme novou úhlovou rychlost tělesa
+      $\mathbf{\omega'} = \mathbf{\omega} \pm j_r \cdot
       \mathbf{I}^{-1}(\mathbf{r} \times \mathbf{n})$
   \end{enumerate}
   \vspace{0.25cm}
   \cite{wikipedia_collision_response}
+  \cite{vimmr}
   \cite{leitner2019}
+  \cite{kopcil_trejbalova}
 \end{frame}
 %------------------------------------------------
 \section{Závěr}
@@ -330,5 +361,4 @@
   \bibliographystyle{alpha}
 \end{frame}
 %------------------------------------------------
-
 \end{document}
